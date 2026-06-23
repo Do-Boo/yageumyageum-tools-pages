@@ -366,27 +366,28 @@
 
         function renderHome() {
             const filteredTools = state.tools.filter(t => t.name.includes(state.searchQuery) || t.desc.includes(state.searchQuery));
+            const cardGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
             const renderCards = (list) => list.map(tool => `
-                <article onclick="navigate('tool', '${tool.id}')" class="n-card n-card-hover cursor-pointer p-[18px] flex items-center gap-4 group mb-4">
-                    <div class="w-[50px] h-[50px] rounded-full flex-shrink-0 ${tool.bg} n-border-sm flex items-center justify-center">
+                <article onclick="navigate('tool', '${tool.id}')" class="n-card n-card-hover cursor-pointer p-[16px] flex items-start gap-3 group h-full min-h-[132px]">
+                    <div class="w-[46px] h-[46px] rounded-full flex-shrink-0 ${tool.bg} n-border-sm flex items-center justify-center">
                         <i data-lucide="${tool.icon}" class="w-[24px] h-[24px] ${tool.color}"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
-                            <h3 class="text-[17px] font-bold text-toss-grey-900 truncate tracking-tight">${tool.name}</h3>
-                            ${tool.badge ? `<span class="px-2.5 py-0.5 text-[11px] font-bold rounded-[6px] n-border-sm bg-toss-yellow-400 text-toss-grey-900">${tool.badge}</span>` : ''}
+                            <h3 class="min-w-0 text-[15px] md:text-[16px] font-bold text-toss-grey-900 truncate tracking-tight">${tool.name}</h3>
+                            ${tool.badge ? `<span class="flex-shrink-0 px-2.5 py-0.5 text-[11px] font-bold rounded-[6px] n-border-sm bg-toss-yellow-400 text-toss-grey-900">${tool.badge}</span>` : ''}
                         </div>
-                        <p class="text-[13px] text-toss-grey-600 font-bold truncate">${tool.desc}</p>
+                        <p class="text-[13px] text-toss-grey-600 font-bold leading-snug line-clamp-2">${tool.desc}</p>
                     </div>
-                    <div class="flex-shrink-0 w-9 h-9 rounded-full n-border-sm flex items-center justify-center bg-white group-hover:bg-toss-grey-100 transition-colors">
+                    <div class="flex-shrink-0 w-8 h-8 mt-1 rounded-full n-border-sm flex items-center justify-center bg-white group-hover:bg-toss-grey-100 transition-colors">
                         <i data-lucide="${tool.badge==='제휴'?'arrow-up-right':'chevron-right'}" class="w-[18px] h-[18px] text-toss-grey-900"></i>
                     </div>
                 </article>
             `).join('');
 
             return `
-                <div class="fade-enter max-w-[600px] mx-auto w-full px-5">
-                    <section class="pt-8 pb-8">
+                <div class="fade-enter max-w-[1180px] mx-auto w-full px-5 md:px-6">
+                    <section class="pt-8 pb-8 max-w-[640px]">
                         <h1 class="text-[28px] md:text-[32px] font-bold text-toss-grey-900 mb-6 tracking-tight leading-tight">야금야금 업무 도구<br><span class="text-[16px] text-toss-grey-600 font-bold tracking-normal">자주 쓰는 웹 유틸리티로 바로 이동</span></h1>
                         <div class="relative">
                             <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-[22px] h-[22px] text-toss-grey-400"></i>
@@ -397,11 +398,11 @@
                     ${state.searchQuery === '' ? renderAdBanner('home_top') : ''}
                     ${state.searchQuery ? `
                         <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1">검색 결과</h2>
-                        ${filteredTools.length > 0 ? `<div class="flex flex-col">${renderCards(filteredTools)}</div>` : `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">검색 결과가 없어요.</p></div>`}</section>
+                        ${filteredTools.length > 0 ? `<div class="${cardGridClass}">${renderCards(filteredTools)}</div>` : `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">검색 결과가 없어요.</p></div>`}</section>
                     ` : `
-                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="wrench" class="w-5 h-5"></i> 웹 유틸리티 도구</h2><div class="flex flex-col">${renderCards(filteredTools.filter(t=>t.category==='utility'))}</div></section>
-                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-toss-blue-500"></i> AI 업무 자동화</h2><div class="flex flex-col">${renderCards(filteredTools.filter(t=>t.category==='ai'))}</div></section>
-                        <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5"></i> 재미</h2><div class="flex flex-col">${renderCards(filteredTools.filter(t=>t.category==='fun'))}</div></section>
+                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="wrench" class="w-5 h-5"></i> 웹 유틸리티 도구</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='utility'))}</div></section>
+                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-toss-blue-500"></i> AI 업무 자동화</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='ai'))}</div></section>
+                        <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5"></i> 재미</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='fun'))}</div></section>
                     `}
                 </div>
             `;
