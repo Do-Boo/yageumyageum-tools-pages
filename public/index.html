@@ -154,6 +154,18 @@
     </nav>
 
     <main id="app" class="pt-24 pb-20 flex flex-col min-h-screen"></main>
+    <noscript>
+        <section class="pt-24 pb-20 px-5 max-w-[860px] mx-auto">
+            <h1 class="text-[32px] font-bold text-toss-grey-900 mb-4">야금야금 업무 도구</h1>
+            <p class="text-[16px] font-bold text-toss-grey-600 mb-6">PDF, 이미지, 텍스트, QR, URL, 메일, 회의록 업무를 빠르게 처리하는 웹 유틸리티입니다.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="tools/pdf/" class="n-card p-5 font-bold text-toss-grey-900">PDF 도구</a>
+                <a href="tools/image/" class="n-card p-5 font-bold text-toss-grey-900">이미지 도구</a>
+                <a href="tools/text/" class="n-card p-5 font-bold text-toss-grey-900">텍스트 정리</a>
+                <a href="guides/" class="n-card p-5 font-bold text-toss-grey-900">업무 가이드</a>
+            </div>
+        </section>
+    </noscript>
 
     <div id="toast-container" class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -245,6 +257,17 @@
             ]
         };
 
+        const toolPagePaths = {
+            'img-tool': 'tools/image/',
+            'pdf-tool': 'tools/pdf/',
+            'text-tool': 'tools/text/',
+            'qr-tool': 'tools/qr/',
+            'link-tool': 'tools/link/',
+            'schedule-tool': 'tools/schedule/',
+            'email-reply': 'tools/email-reply/',
+            'meeting-notes': 'tools/meeting-notes/',
+        };
+
         // 개발 편의 뱃지 처리
         state.tools.forEach(t => { if(t.badge === '준비중') t.badge = null; });
 
@@ -289,6 +312,12 @@
             syncRouteToURL(view, state.currentTool?.id);
             window.scrollTo(0,0);
             renderView();
+        }
+
+        function handleToolCardClick(event, toolId) {
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+            event.preventDefault();
+            navigate('tool', toolId);
         }
 
         function applyInitialRouteFromURL() {
@@ -368,7 +397,7 @@
             const filteredTools = state.tools.filter(t => t.name.includes(state.searchQuery) || t.desc.includes(state.searchQuery));
             const cardGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
             const renderCards = (list) => list.map(tool => `
-                <article onclick="navigate('tool', '${tool.id}')" class="n-card n-card-hover cursor-pointer p-[16px] flex items-start gap-3 group h-full min-h-[132px]">
+                <a href="${toolPagePaths[tool.id] || `?tool=${tool.id}`}" onclick="handleToolCardClick(event, '${tool.id}')" class="n-card n-card-hover cursor-pointer p-[16px] flex items-start gap-3 group h-full min-h-[132px]">
                     <div class="w-[46px] h-[46px] rounded-full flex-shrink-0 ${tool.bg} n-border-sm flex items-center justify-center">
                         <i data-lucide="${tool.icon}" class="w-[24px] h-[24px] ${tool.color}"></i>
                     </div>
@@ -382,7 +411,7 @@
                     <div class="flex-shrink-0 w-8 h-8 mt-1 rounded-full n-border-sm flex items-center justify-center bg-white group-hover:bg-toss-grey-100 transition-colors">
                         <i data-lucide="${tool.badge==='제휴'?'arrow-up-right':'chevron-right'}" class="w-[18px] h-[18px] text-toss-grey-900"></i>
                     </div>
-                </article>
+                </a>
             `).join('');
 
             return `
@@ -403,6 +432,14 @@
                         <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="wrench" class="w-5 h-5"></i> 웹 유틸리티 도구</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='utility'))}</div></section>
                         <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-toss-blue-500"></i> AI 업무 자동화</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='ai'))}</div></section>
                         <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5"></i> 재미</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='fun'))}</div></section>
+                        <footer class="border-t border-toss-grey-900 pt-8 pb-4 flex flex-wrap gap-3 text-[13px] font-bold text-toss-grey-700">
+                            <a href="guides/" class="hover:text-toss-grey-900">업무 가이드</a>
+                            <a href="about/" class="hover:text-toss-grey-900">소개</a>
+                            <a href="privacy/" class="hover:text-toss-grey-900">개인정보 처리방침</a>
+                            <a href="terms/" class="hover:text-toss-grey-900">이용약관</a>
+                            <a href="affiliate-disclosure/" class="hover:text-toss-grey-900">광고 및 제휴 고지</a>
+                            <a href="contact/" class="hover:text-toss-grey-900">문의</a>
+                        </footer>
                     `}
                 </div>
             `;

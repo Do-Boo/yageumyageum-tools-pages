@@ -39,7 +39,8 @@ jobs:
           fi
           SITE_URL="${SITE_URL%/}/"
           export SITE_URL
-          perl -0pi -e 's#https://tools.yageumyageum.app/#$ENV{SITE_URL}#g' dist/index.html dist/sitemap.xml
+          mapfile -t SEO_FILES < <(find dist -type f \( -name '*.html' -o -name '*.xml' -o -name 'robots.txt' \))
+          perl -0pi -e 's#https://tools.yageumyageum.app/#$ENV{SITE_URL}#g' "${SEO_FILES[@]}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
