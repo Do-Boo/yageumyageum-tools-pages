@@ -35,7 +35,7 @@ jobs:
             SITE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}/"
           fi
           SITE_URL="${SITE_URL%/}/"
-          perl -0pi -e "s#https://tools.yageumyageum.app/#$ENV{SITE_URL}#g" dist/index.html dist/sitemap.xml
+          perl -0pi -e 's#https://tools.yageumyageum.app/#$ENV{SITE_URL}#g' dist/index.html dist/sitemap.xml
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
