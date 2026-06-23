@@ -32,11 +32,13 @@ jobs:
           rm -rf dist
           cp -R public dist
           REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          OWNER_SLUG="$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
           SITE_URL="${{ vars.PAGES_SITE_URL }}"
           if [ -z "$SITE_URL" ]; then
-            SITE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}/"
+            SITE_URL="https://${OWNER_SLUG}.github.io/${REPO_NAME}/"
           fi
           SITE_URL="${SITE_URL%/}/"
+          export SITE_URL
           perl -0pi -e 's#https://tools.yageumyageum.app/#$ENV{SITE_URL}#g' dist/index.html dist/sitemap.xml
       - uses: actions/upload-pages-artifact@v3
         with:
