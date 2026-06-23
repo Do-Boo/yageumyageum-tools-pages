@@ -248,7 +248,10 @@
         // 개발 편의 뱃지 처리
         state.tools.forEach(t => { if(t.badge === '준비중') t.badge = null; });
 
-        document.addEventListener('DOMContentLoaded', () => renderView());
+        document.addEventListener('DOMContentLoaded', () => {
+            applyInitialRouteFromURL();
+            renderView();
+        });
 
         function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('bg-toss-blue-50'); }
         function handleDragLeave(e) { e.preventDefault(); e.currentTarget.classList.remove('bg-toss-blue-50'); }
@@ -276,14 +279,38 @@
         function navigate(view, toolId = null) {
             if (toolId) {
                 const selectedTool = state.tools.find(t => t.id === toolId);
+                if (!selectedTool) return showToast('도구를 찾을 수 없습니다.', 'default');
                 if (selectedTool.badge === '준비중') return showToast('해당 기능은 열심히 준비 중입니다!', 'default');
                 if (selectedTool.badge === '제휴') return showToast('제휴 페이지로 이동합니다. (Mockup)', 'default');
                 state.currentTool = selectedTool;
             }
             state.currentView = view;
             if(view !== 'tool') state.searchQuery = '';
+            syncRouteToURL(view, state.currentTool?.id);
             window.scrollTo(0,0);
             renderView();
+        }
+
+        function applyInitialRouteFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const toolId = params.get('tool');
+            if (!toolId) return;
+
+            const selectedTool = state.tools.find(t => t.id === toolId);
+            if (!selectedTool || selectedTool.badge === '준비중' || selectedTool.badge === '제휴') return;
+
+            state.currentTool = selectedTool;
+            state.currentView = 'tool';
+        }
+
+        function syncRouteToURL(view, toolId = null) {
+            const url = new URL(window.location.href);
+            if (view === 'tool' && toolId) {
+                url.searchParams.set('tool', toolId);
+            } else {
+                url.searchParams.delete('tool');
+            }
+            window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
         }
 
         function updateNavUI() {
