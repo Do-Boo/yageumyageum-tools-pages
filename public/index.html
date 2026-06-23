@@ -396,10 +396,10 @@
                             <div class="flex-1">
                                 <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">어조 (말투)</label>
                                 <select id="aiTone" class="w-full n-input p-3 text-[14px] font-bold text-toss-grey-900">
-                                    <option value="정중하고 프로페셔널하게">👔 정중하고 깍듯하게</option>
-                                    <option value="친근하고 부드럽게">😊 친근하고 부드럽게</option>
-                                    <option value="단호하고 명확하게">⚡ 단호하고 명확하게</option>
-                                    <option value="건조하고 객관적으로">📊 건조하고 객관적으로</option>
+                                    <option value="정중하고 프로페셔널하게">정중하고 깍듯하게</option>
+                                    <option value="친근하고 부드럽게">친근하고 부드럽게</option>
+                                    <option value="단호하고 명확하게">단호하고 명확하게</option>
+                                    <option value="건조하고 객관적으로">건조하고 객관적으로</option>
                                 </select>
                             </div>
                             <div class="flex-1">
@@ -744,9 +744,9 @@
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2 mb-6">
                         <select id="todoPriority" class="w-full sm:w-[120px] n-input px-3 py-3 text-[14px] font-bold text-toss-grey-900">
-                            <option value="🔴 높음">🔴 높음</option>
-                            <option value="🟡 보통" selected>🟡 보통</option>
-                            <option value="🔵 낮음">🔵 낮음</option>
+                            <option value="높음">높음</option>
+                            <option value="보통" selected>보통</option>
+                            <option value="낮음">낮음</option>
                         </select>
                         <input type="text" id="todoInput" class="flex-1 n-input px-4 py-3 text-[15px] font-bold text-toss-grey-900" placeholder="할 일을 입력하세요." onkeypress="if(event.key === 'Enter') addMockTodo()">
                         <button onclick="addMockTodo()" class="n-btn bg-toss-teal-500 text-white font-bold px-5 py-3 whitespace-nowrap">추가</button>
@@ -755,7 +755,7 @@
                     <ul id="todoList" class="space-y-3">
                         <li class="flex items-center gap-3 p-3 bg-white n-border rounded-[12px] group fade-enter">
                             <input type="checkbox" class="w-5 h-5 n-input cursor-pointer">
-                            <span class="text-[13px] font-bold text-toss-red-500">🔴 높음</span>
+                            <span class="text-[13px] font-bold text-toss-red-500">높음</span>
                             <span class="text-[15px] font-bold text-toss-grey-900 flex-1">주간 회의 자료 취합</span>
                             <button onclick="this.parentElement.remove()" class="n-btn-sm bg-white p-1 text-toss-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                         </li>
