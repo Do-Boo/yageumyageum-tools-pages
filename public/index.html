@@ -232,10 +232,6 @@
             searchQuery: '',
             pdfMode: 'merge',
             history: JSON.parse(localStorage.getItem('work_survival_history') || '[]'),
-            ads: [
-                { id: 'ad-1', title: '맥북 프로', desc: '고성능 노트북 확인 · 쿠팡 파트너스 링크', link: 'https://link.coupang.com/a/eHA8TiM9fM', visible: true, position: 'home_top', badge: '광고' },
-                { id: 'ad-2', title: '모나미 볼펜', desc: '회의록도 업무처럼 보이게 하는 기본템', link: 'https://link.coupang.com/a/eHA94Z4nDw', visible: true, position: 'tool_bottom', badge: '광고' }
-            ],
             tools: [
                 { id: 'img-tool', name: '이미지 도구', category: 'utility', desc: '포맷 변환, 크기 조절, 그리기/자르기', icon: 'image', bg: 'bg-toss-yellow-400', color: 'text-toss-grey-900', type: 'utility' },
                 { id: 'pdf-tool', name: 'PDF 도구', category: 'utility', desc: '합치기, 분할, 뷰어/형광펜, 용량 압축', icon: 'file-type-2', bg: 'bg-toss-red-500', color: 'text-white', type: 'utility' },
@@ -244,8 +240,6 @@
                 { id: 'link-tool', name: '링크 정리', category: 'utility', desc: '단축 URL 생성, UTM 제거, 인코딩', icon: 'link', bg: 'bg-toss-purple-500', color: 'text-white', type: 'utility' },
                 { id: 'qr-tool', name: 'QR 만들기', category: 'utility', desc: '색상 및 크기 지정 가능 QR 생성', icon: 'qr-code', bg: 'bg-toss-orange-500', color: 'text-white', type: 'utility' },
                 { id: 'schedule-tool', name: '일정관리', category: 'utility', desc: '업무 일정과 오늘 할 일 (우선순위)', icon: 'calendar-days', bg: 'bg-toss-teal-500', color: 'text-white', type: 'utility' },
-                { id: 'recommend-tool', name: '업무 도구 추천', category: 'utility', desc: '사무실에서 쓸 생산성 툴 둘러보기', badge: '제휴', icon: 'briefcase', bg: 'bg-toss-grey-900', color: 'text-white', isHighlight: true, type: 'utility' },
-                
                 { id: 'email-reply', name: '메일 답장 생성기', category: 'ai', desc: '정중하고 프로페셔널한 이메일 작성', icon: 'mail', bg: 'bg-white', color: 'text-toss-blue-500', type: 'ai', template: '다음 상황에 맞는 비즈니스 이메일 답장을 작성해. 목적 및 상황: {input}.' },
                 { id: 'meeting-notes', name: '회의록 생성기', category: 'ai', desc: '회의 내용 요약 및 액션 아이템 도출', icon: 'file-text', bg: 'bg-white', color: 'text-toss-green-500', type: 'ai', template: '다음 회의 내용을 바탕으로 깔끔한 회의록을 작성해. [요약], [주요 결정사항], [액션 아이템]으로 나누어 작성해. 내용: {input}' },
                 { id: 'report-refine', name: '보고서 문장 다듬기', category: 'ai', desc: '대충 쓴 초안을 격식있는 보고서 톤으로', icon: 'pen-tool', bg: 'bg-white', color: 'text-toss-orange-500', type: 'ai', template: '다음 문장을 회사 보고서에 적합한 명확하며 간결한(개조식 포함) 문장으로 다듬어: {input}' },
@@ -371,30 +365,6 @@
             if (window.yageumAds?.render) window.yageumAds.render(app);
         }
 
-        function openAdLink(adId) {
-            const ad = state.ads.find(item => item.id === adId);
-            if (!ad || !ad.link || ad.link === '#') return showToast('광고 링크가 아직 설정되지 않았습니다.', 'default');
-            window.open(ad.link, '_blank', 'noopener,noreferrer');
-        }
-
-        function renderAdBanner(position) {
-            const ad = state.ads.find(a => a.visible && a.position === position);
-            if (!ad) return '';
-            return `
-                <article onclick="openAdLink('${ad.id}')" class="w-full n-card n-card-hover p-[20px] mb-8 cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4" style="background-color:#ffd158">
-                    <div>
-                        <span class="inline-block px-2 py-[2px] bg-white n-border-sm text-toss-grey-900 text-[11px] font-bold rounded-[6px] mb-2">${ad.badge}</span>
-                        <h3 class="text-[16px] font-bold text-toss-grey-900">${ad.title}</h3>
-                        <p class="text-[14px] font-bold text-toss-grey-800 mt-1">${ad.desc}</p>
-                        <p class="text-[11px] font-bold text-toss-grey-800 mt-2">광고 · 쿠팡 파트너스 활동으로 수수료를 제공받을 수 있음</p>
-                    </div>
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-white n-border-sm flex items-center justify-center" style="align-self:flex-end">
-                        <i data-lucide="chevron-right" class="w-5 h-5 text-toss-grey-900"></i>
-                    </div>
-                </article>
-            `;
-        }
-
         function renderHome() {
             const filteredTools = state.tools.filter(t => t.name.includes(state.searchQuery) || t.desc.includes(state.searchQuery));
             const cardGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
@@ -426,8 +396,7 @@
                                 class="w-full n-input py-[16px] pl-14 pr-5 text-[16px] font-bold text-toss-grey-900 placeholder-toss-grey-400">
                         </div>
                     </section>
-                    ${state.searchQuery === '' ? renderAdBanner('home_top') : ''}
-                    ${state.searchQuery === '' ? `<aside class="mb-8" data-ad-slot-name="homeTop" data-ad-fallback="none" aria-label="광고"></aside>` : ''}
+                    ${state.searchQuery === '' ? `<aside class="mb-8" data-ad-slot-name="homeTop" aria-label="광고"></aside>` : ''}
                     ${state.searchQuery ? `
                         <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1">검색 결과</h2>
                         ${filteredTools.length > 0 ? `<div class="${cardGridClass}">${renderCards(filteredTools)}</div>` : `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">검색 결과가 없어요.</p></div>`}</section>
@@ -440,7 +409,7 @@
                             <a href="about/" class="hover:text-toss-grey-900">소개</a>
                             <a href="privacy/" class="hover:text-toss-grey-900">개인정보 처리방침</a>
                             <a href="terms/" class="hover:text-toss-grey-900">이용약관</a>
-                            <a href="affiliate-disclosure/" class="hover:text-toss-grey-900">광고 및 제휴 고지</a>
+                            <a href="affiliate-disclosure/" class="hover:text-toss-grey-900">광고 고지</a>
                             <a href="contact/" class="hover:text-toss-grey-900">문의</a>
                         </footer>
                     `}

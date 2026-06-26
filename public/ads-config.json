@@ -9,28 +9,9 @@
       "articleBottom": ""
     }
   },
-  "affiliateDisclosure": "광고 · 쿠팡 파트너스 활동으로 수수료를 제공받을 수 있음",
-  "fallbackOffers": [
-    {
-      "id": "coupang-macbook-pro",
-      "title": "맥북 프로",
-      "description": "무거운 파일도 조용히 밀어붙이는 업무용 노트북",
-      "url": "https://link.coupang.com/a/eHA8TiM9fM",
-      "badge": "쿠팡"
-    },
-    {
-      "id": "coupang-monami",
-      "title": "모나미 볼펜",
-      "description": "회의록, 결재선, 급한 메모까지 버티는 책상 기본템",
-      "url": "https://link.coupang.com/a/eHA94Z4nDw",
-      "badge": "쿠팡"
-    },
-    {
-      "id": "coupang-airpods-pro-3",
-      "title": "에어팟 프로 3",
-      "description": "말 걸기 애매한 집중 모드를 조용히 켜두는 이어폰",
-      "url": "https://link.coupang.com/a/eHBbFKogzQ",
-      "badge": "쿠팡"
-    }
-  ]
+  "placeholder": {
+    "label": "광고",
+    "title": "Google AdSense 광고 영역",
+    "description": "AdSense 승인 후 실제 광고가 표시됩니다."
+  }
 }
