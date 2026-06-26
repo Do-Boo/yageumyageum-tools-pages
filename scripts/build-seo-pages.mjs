@@ -411,9 +411,10 @@ function relatedToolLinks(slugs, prefix) {
     .join('');
 }
 
-function pageLayout({ route, title, description, type = 'website', h1, intro, body, structuredData = [] }) {
+function pageLayout({ route, title, description, type = 'website', h1, intro, body, structuredData = [], adSlotName = null }) {
   const prefix = prefixFor(route);
   const url = canonical(route);
+  const adSlot = adSlotName ? `\n    <aside class="ad-slot" data-ad-slot-name="${escapeHtml(adSlotName)}" aria-label="광고"></aside>` : '';
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -438,6 +439,7 @@ function pageLayout({ route, title, description, type = 'website', h1, intro, bo
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <meta name="twitter:image" content="${new URL('og-image.svg', siteUrl).href}">
   ${structuredData.map((data) => `<script type="application/ld+json">${jsonLd(data)}</script>`).join('\n  ')}
+  <script defer src="${prefix}assets/ads.js" data-config="${prefix}ads-config.json"></script>
 </head>
 <body>
   <header class="site-header">
@@ -454,7 +456,7 @@ function pageLayout({ route, title, description, type = 'website', h1, intro, bo
       <p class="kicker">야금야금 업무 도구</p>
       <h1>${escapeHtml(h1)}</h1>
       <p>${escapeHtml(intro)}</p>
-    </section>
+    </section>${adSlot}
     ${body}
   </main>
   <footer class="site-footer">
@@ -538,7 +540,7 @@ function toolPage(tool) {
       <div class="link-grid">${relatedToolLinks(tool.related, prefix)}</div>
     </section>
   `;
-  return { route, html: pageLayout({ route, title: tool.title, description: tool.metaDescription, h1: tool.h1, intro: tool.intro, body, structuredData }) };
+  return { route, html: pageLayout({ route, title: tool.title, description: tool.metaDescription, h1: tool.h1, intro: tool.intro, body, structuredData, adSlotName: 'toolTop' }) };
 }
 
 function guidePage(guide) {
@@ -576,7 +578,7 @@ function guidePage(guide) {
       <div class="link-grid">${relatedToolLinks(guide.relatedTools, prefix)}</div>
     </section>
   `;
-  return { route, html: pageLayout({ route, title: guide.title, description: guide.metaDescription, type: 'article', h1: guide.h1, intro: guide.intro, body, structuredData }) };
+  return { route, html: pageLayout({ route, title: guide.title, description: guide.metaDescription, type: 'article', h1: guide.h1, intro: guide.intro, body, structuredData, adSlotName: 'articleInline' }) };
 }
 
 function guidesIndex() {
@@ -602,6 +604,7 @@ function guidesIndex() {
       intro: '반복되는 업무를 빠르게 처리할 수 있도록 도구 사용법과 실무 체크리스트를 정리했습니다.',
       body,
       structuredData: [breadcrumb(route, '업무 도구 가이드 모음')],
+      adSlotName: 'articleBottom',
     }),
   };
 }
@@ -719,6 +722,9 @@ h2 {
   flex-wrap: wrap;
   gap: 12px;
   margin: 0 0 28px;
+}
+.ad-slot {
+  margin-bottom: 28px;
 }
 .primary-action, .secondary-action {
   display: inline-flex;
@@ -852,8 +858,8 @@ Allow: /
 
 Sitemap: ${new URL('sitemap.xml', siteUrl).href}
 `);
-  await writeFile(path.join(outDir, 'ads.txt'), `# Google AdSense 승인 후 실제 publisher ID로 교체하세요.
-# 예: google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+  await writeFile(path.join(outDir, 'ads.txt'), `# Google AdSense 승인 후 실제 publisher ID로 아래 예시를 교체하세요.
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
 `);
 }
 

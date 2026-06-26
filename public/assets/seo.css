@@ -76,6 +76,9 @@ h2 {
   gap: 12px;
   margin: 0 0 28px;
 }
+.ad-slot {
+  margin-bottom: 28px;
+}
 .primary-action, .secondary-action {
   display: inline-flex;
   align-items: center;
