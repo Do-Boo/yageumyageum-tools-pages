@@ -135,6 +135,14 @@
 
   function loadConfig() {
     if (!runtime.configPromise) {
+      if (new URL(configHref).protocol === 'file:') {
+        runtime.configPromise = Promise.resolve({
+          placeholder: defaultPlaceholder,
+          adsense: { enabled: false, client: '', slots: {} },
+        });
+        return runtime.configPromise;
+      }
+
       runtime.configPromise = fetch(configHref, { cache: 'no-store' })
         .then((response) => {
           if (!response.ok) throw new Error(`ad config ${response.status}`);
