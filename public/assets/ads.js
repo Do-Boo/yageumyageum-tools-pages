@@ -178,6 +178,14 @@
     );
   }
 
+  function hasUsableAutoAds(config) {
+    return Boolean(
+      config?.adsense?.enabled === true &&
+      config.adsense.autoAds?.enabled === true &&
+      validClient(config.adsense.client)
+    );
+  }
+
   function canRenderSlot(slot) {
     if (slot.dataset.adPlacement !== 'side') return true;
     return window.matchMedia?.('(min-width: 1540px)').matches === true;
@@ -188,7 +196,7 @@
       if (new URL(configHref).protocol === 'file:') {
         runtime.configPromise = Promise.resolve({
           placeholder: defaultPlaceholder,
-          adsense: { enabled: false, client: '', slots: {} },
+          adsense: { enabled: false, client: '', autoAds: { enabled: false }, slots: {} },
         });
         return runtime.configPromise;
       }
@@ -200,7 +208,7 @@
         })
         .catch(() => ({
           placeholder: defaultPlaceholder,
-          adsense: { enabled: false, client: '', slots: {} },
+          adsense: { enabled: false, client: '', autoAds: { enabled: false }, slots: {} },
         }));
     }
     return runtime.configPromise;
@@ -276,6 +284,10 @@
   async function render(root = document) {
     injectStyles();
     const config = await loadConfig();
+    const canUseAutoAds = hasUsableAutoAds(config);
+    if (canUseAutoAds) {
+      ensureAdsenseScript(config.adsense.client.trim()).catch(() => undefined);
+    }
     const slots = root.querySelectorAll?.('[data-ad-slot-name]:not([data-ad-rendered])') || [];
     slots.forEach((slot) => {
       if (!canRenderSlot(slot)) {
@@ -285,6 +297,9 @@
       const slotName = slot.dataset.adSlotName;
       if (hasUsableAdsense(config, slotName)) {
         renderAdsense(slot, config);
+      } else if (canUseAutoAds) {
+        slot.hidden = true;
+        slot.dataset.adRendered = 'auto-hidden';
       } else {
         renderPlaceholder(slot, config);
       }

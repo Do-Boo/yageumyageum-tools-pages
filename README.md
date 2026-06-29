@@ -49,3 +49,29 @@ npx wrangler pages deploy public --project-name yageumyageum-tools --branch main
 The `wrangler.jsonc` file also declares `public/` as the Pages output directory for dashboard-based builds.
 
 After the new host is live, point `tools.yageumyageum.app` at that host and keep the canonical SEO URL as `https://tools.yageumyageum.app/`.
+
+## AdSense
+
+AdSense settings live in `public/ads-config.json`.
+
+For Auto ads, fill only the publisher client ID and enable Auto ads:
+
+```json
+{
+  "adsense": {
+    "enabled": true,
+    "client": "ca-pub-0000000000000000",
+    "autoAds": {
+      "enabled": true
+    }
+  }
+}
+```
+
+For manual ad units, also fill the numeric slot IDs under `adsense.slots`. Empty manual slots are hidden when Auto ads is enabled.
+
+Replace the example in `public/ads.txt` with the AdSense publisher line after AdSense gives you the publisher ID:
+
+```txt
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+```

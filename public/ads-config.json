@@ -2,6 +2,9 @@
   "adsense": {
     "enabled": false,
     "client": "",
+    "autoAds": {
+      "enabled": false
+    },
     "slots": {
       "homeTop": "",
       "toolTop": "",
