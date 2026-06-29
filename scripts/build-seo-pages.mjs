@@ -14,6 +14,7 @@ const adsenseSlots = {
   sideLeft: process.env.ADSENSE_SLOT_SIDE_LEFT || '',
   sideRight: process.env.ADSENSE_SLOT_SIDE_RIGHT || '',
 };
+let pageAdsenseClient = '';
 
 const toolPages = [
   {
@@ -452,6 +453,7 @@ function pageLayout({ route, title, description, type = 'website', h1, intro, bo
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <meta name="twitter:image" content="${new URL('og-image.svg', siteUrl).href}">
   ${structuredData.map((data) => `<script type="application/ld+json">${jsonLd(data)}</script>`).join('\n  ')}
+  ${adsenseHeadSnippet()}
   <script defer src="${prefix}assets/ads.js" data-config="${prefix}ads-config.json"></script>
 </head>
 <body>
@@ -662,6 +664,18 @@ function validAdsenseClient(client) {
   return adsenseClientPattern.test(String(client || '').trim());
 }
 
+function adsenseClientFromConfig(config) {
+  const client = String(config?.adsense?.client || '').trim();
+  return validAdsenseClient(client) ? client : '';
+}
+
+function adsenseHeadSnippet() {
+  if (!validAdsenseClient(pageAdsenseClient)) return '';
+
+  const client = escapeHtml(pageAdsenseClient.trim());
+  return `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${client}" crossorigin="anonymous"></script>`;
+}
+
 function validAdsenseSlot(slot) {
   return slot === '' || adsenseSlotPattern.test(String(slot || '').trim());
 }
@@ -723,13 +737,15 @@ async function ensureAdsConfig() {
   const envConfig = adsConfigFromEnv();
   if (envConfig) {
     await writeFile(target, `${JSON.stringify(envConfig, null, 2)}\n`);
-    return;
+    return envConfig;
   }
 
   try {
-    await readFile(target, 'utf8');
+    return JSON.parse(await readFile(target, 'utf8'));
   } catch {
-    await writeFile(target, `${JSON.stringify(placeholderAdsConfig(), null, 2)}\n`);
+    const placeholder = placeholderAdsConfig();
+    await writeFile(target, `${JSON.stringify(placeholder, null, 2)}\n`);
+    return placeholder;
   }
 }
 
@@ -941,6 +957,10 @@ async function writePage(page) {
 }
 
 async function main() {
+  await mkdir(outDir, { recursive: true });
+  const adsConfig = await ensureAdsConfig();
+  pageAdsenseClient = adsenseClientFromConfig(adsConfig);
+
   const pages = [
     ...toolPages.map(toolPage),
     guidesIndex(),
@@ -963,7 +983,6 @@ Allow: /
 
 Sitemap: ${new URL('sitemap.xml', siteUrl).href}
 `);
-  await ensureAdsConfig();
   await ensureAdsTxt();
 }
 
