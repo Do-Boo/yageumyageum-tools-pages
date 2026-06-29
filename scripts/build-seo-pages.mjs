@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const siteUrl = 'https://tools.yageumyageum.app/';
+const siteUrl = process.env.SITE_URL || 'https://yageumyageum-tools-pages.vercel.app/';
 const lastmod = '2026-06-23';
 const outDir = path.resolve('public');
 

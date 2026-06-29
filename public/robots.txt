@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tools.yageumyageum.app/sitemap.xml
+Sitemap: https://yageumyageum-tools-pages.vercel.app/sitemap.xml

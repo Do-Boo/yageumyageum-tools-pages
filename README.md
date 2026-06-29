@@ -48,7 +48,7 @@ npx wrangler pages deploy public --project-name yageumyageum-tools --branch main
 
 The `wrangler.jsonc` file also declares `public/` as the Pages output directory for dashboard-based builds.
 
-After the new host is live, point `tools.yageumyageum.app` at that host and keep the canonical SEO URL as `https://tools.yageumyageum.app/`.
+The current public SEO URL is `https://yageumyageum-tools-pages.vercel.app/`. After `tools.yageumyageum.app` DNS is live, set `SITE_URL=https://tools.yageumyageum.app/`, rebuild, and redeploy.
 
 ## AdSense
 
@@ -74,4 +74,14 @@ Replace the example in `public/ads.txt` with the AdSense publisher line after Ad
 
 ```txt
 google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+```
+
+## Search Submission
+
+The current sitemap is `https://yageumyageum-tools-pages.vercel.app/sitemap.xml`.
+
+IndexNow is configured with `public/bf695f251fd5a6f47bd9e627cba4b424.txt`. After deployment, submit all sitemap URLs to participating search engines:
+
+```bash
+node scripts/submit-indexnow.mjs
 ```
