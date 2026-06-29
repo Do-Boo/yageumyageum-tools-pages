@@ -5,6 +5,8 @@
     label: '광고',
     title: 'Google AdSense 광고 영역',
     description: 'AdSense 승인 후 실제 광고가 표시됩니다.',
+    sideTitle: 'AdSense 광고',
+    sideDescription: '승인 후 표시됩니다.',
   };
   const clientPattern = /^ca-pub-\d+$/;
   const slotPattern = /^\d+$/;
@@ -33,6 +35,9 @@
       }
       [data-ad-slot-name][hidden] {
         display: none !important;
+      }
+      [data-ad-placement="side"] {
+        display: none;
       }
       .yageum-ad-label {
         display: inline-flex;
@@ -104,6 +109,46 @@
       .yageum-ad-adsense .adsbygoogle {
         min-height: 90px;
       }
+      @media (min-width: 1540px) {
+        [data-ad-placement="side"] {
+          position: fixed;
+          top: 96px;
+          z-index: 30;
+          display: block;
+          width: 144px;
+          margin: 0;
+        }
+        [data-ad-side="left"] {
+          left: max(24px, calc((100vw - 1180px) / 2 - 172px));
+        }
+        [data-ad-side="right"] {
+          right: max(24px, calc((100vw - 1180px) / 2 - 172px));
+        }
+        [data-ad-placement="side"] .yageum-ad-placeholder {
+          min-height: 320px;
+          padding: 14px 12px;
+          border-radius: 14px;
+          box-shadow: 3px 3px 0 #191f28;
+        }
+        [data-ad-placement="side"] .yageum-ad-placeholder strong {
+          font-size: 14px;
+          line-height: 1.3;
+        }
+        [data-ad-placement="side"] .yageum-ad-placeholder p {
+          font-size: 12px;
+          line-height: 1.45;
+        }
+        [data-ad-placement="side"] .yageum-ad-badge,
+        [data-ad-placement="side"] .yageum-ad-label {
+          min-height: 22px;
+          padding: 2px 7px;
+          font-size: 10px;
+        }
+        [data-ad-placement="side"] .yageum-ad-adsense {
+          min-height: 320px;
+          padding: 10px;
+        }
+      }
       @media (max-width: 640px) {
         [data-ad-slot-name] {
           margin-bottom: 24px;
@@ -131,6 +176,11 @@
       validClient(config.adsense.client) &&
       validSlot(config.adsense.slots?.[slotName])
     );
+  }
+
+  function canRenderSlot(slot) {
+    if (slot.dataset.adPlacement !== 'side') return true;
+    return window.matchMedia?.('(min-width: 1540px)').matches === true;
   }
 
   function loadConfig() {
@@ -178,14 +228,16 @@
 
   function renderPlaceholder(slot, config) {
     const placeholder = { ...defaultPlaceholder, ...config?.placeholder };
+    const title = slot.dataset.adPlacement === 'side' ? placeholder.sideTitle : placeholder.title;
+    const description = slot.dataset.adPlacement === 'side' ? placeholder.sideDescription : placeholder.description;
     slot.hidden = false;
     slot.dataset.adRendered = 'placeholder';
     slot.innerHTML = `
       <div class="yageum-ad-placeholder">
         <span>
           <span class="yageum-ad-badge">${escapeHtml(placeholder.label)}</span>
-          <strong>${escapeHtml(placeholder.title)}</strong>
-          <p>${escapeHtml(placeholder.description)}</p>
+          <strong>${escapeHtml(title)}</strong>
+          <p>${escapeHtml(description)}</p>
         </span>
       </div>
     `;
@@ -195,6 +247,7 @@
     const slotName = slot.dataset.adSlotName;
     const client = config.adsense.client.trim();
     const adSlot = config.adsense.slots[slotName].trim();
+    const fullWidthResponsive = slot.dataset.adPlacement === 'side' ? 'false' : 'true';
     slot.hidden = false;
     slot.dataset.adRendered = 'adsense';
     slot.innerHTML = `
@@ -205,7 +258,7 @@
           data-ad-client="${escapeHtml(client)}"
           data-ad-slot="${escapeHtml(adSlot)}"
           data-ad-format="auto"
-          data-full-width-responsive="true"></ins>
+          data-full-width-responsive="${fullWidthResponsive}"></ins>
       </div>
     `;
     ensureAdsenseScript(client)
@@ -225,6 +278,10 @@
     const config = await loadConfig();
     const slots = root.querySelectorAll?.('[data-ad-slot-name]:not([data-ad-rendered])') || [];
     slots.forEach((slot) => {
+      if (!canRenderSlot(slot)) {
+        slot.hidden = true;
+        return;
+      }
       const slotName = slot.dataset.adSlotName;
       if (hasUsableAdsense(config, slotName)) {
         renderAdsense(slot, config);

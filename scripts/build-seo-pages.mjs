@@ -415,6 +415,9 @@ function pageLayout({ route, title, description, type = 'website', h1, intro, bo
   const prefix = prefixFor(route);
   const url = canonical(route);
   const adSlot = adSlotName ? `\n    <aside class="ad-slot" data-ad-slot-name="${escapeHtml(adSlotName)}" aria-label="광고"></aside>` : '';
+  const sideAdSlots = `
+  <aside hidden class="yageum-side-ad yageum-side-ad-left" data-ad-slot-name="sideLeft" data-ad-placement="side" data-ad-side="left" aria-label="왼쪽 광고"></aside>
+  <aside hidden class="yageum-side-ad yageum-side-ad-right" data-ad-slot-name="sideRight" data-ad-placement="side" data-ad-side="right" aria-label="오른쪽 광고"></aside>`;
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -458,7 +461,7 @@ function pageLayout({ route, title, description, type = 'website', h1, intro, bo
       <p>${escapeHtml(intro)}</p>
     </section>${adSlot}
     ${body}
-  </main>
+  </main>${sideAdSlots}
   <footer class="site-footer">
     <a href="${prefix}privacy/">개인정보 처리방침</a>
     <a href="${prefix}terms/">이용약관</a>

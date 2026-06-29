@@ -6,12 +6,16 @@
       "homeTop": "",
       "toolTop": "",
       "articleInline": "",
-      "articleBottom": ""
+      "articleBottom": "",
+      "sideLeft": "",
+      "sideRight": ""
     }
   },
   "placeholder": {
     "label": "광고",
     "title": "Google AdSense 광고 영역",
-    "description": "AdSense 승인 후 실제 광고가 표시됩니다."
+    "description": "AdSense 승인 후 실제 광고가 표시됩니다.",
+    "sideTitle": "AdSense 광고",
+    "sideDescription": "승인 후 표시됩니다."
   }
 }
