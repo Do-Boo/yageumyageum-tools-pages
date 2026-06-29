@@ -1,9 +1,19 @@
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const siteUrl = process.env.SITE_URL || 'https://yageumyageum-tools-pages.vercel.app/';
 const lastmod = '2026-06-23';
 const outDir = path.resolve('public');
+const adsenseClientPattern = /^ca-pub-\d+$/;
+const adsenseSlotPattern = /^\d+$/;
+const adsenseSlots = {
+  homeTop: process.env.ADSENSE_SLOT_HOME_TOP || '',
+  toolTop: process.env.ADSENSE_SLOT_TOOL_TOP || '',
+  articleInline: process.env.ADSENSE_SLOT_ARTICLE_INLINE || '',
+  articleBottom: process.env.ADSENSE_SLOT_ARTICLE_BOTTOM || '',
+  sideLeft: process.env.ADSENSE_SLOT_SIDE_LEFT || '',
+  sideRight: process.env.ADSENSE_SLOT_SIDE_RIGHT || '',
+};
 
 const toolPages = [
   {
@@ -648,6 +658,98 @@ ${entries.map((route) => `  <url>
 `;
 }
 
+function validAdsenseClient(client) {
+  return adsenseClientPattern.test(String(client || '').trim());
+}
+
+function validAdsenseSlot(slot) {
+  return slot === '' || adsenseSlotPattern.test(String(slot || '').trim());
+}
+
+function placeholderAdsConfig() {
+  return {
+    adsense: {
+      enabled: false,
+      client: '',
+      autoAds: {
+        enabled: false,
+      },
+      slots: {
+        homeTop: '',
+        toolTop: '',
+        articleInline: '',
+        articleBottom: '',
+        sideLeft: '',
+        sideRight: '',
+      },
+    },
+    placeholder: {
+      label: '광고',
+      title: 'Google AdSense 광고 영역',
+      description: 'AdSense 승인 후 실제 광고가 표시됩니다.',
+      sideTitle: 'AdSense 광고',
+      sideDescription: '승인 후 표시됩니다.',
+    },
+  };
+}
+
+function adsConfigFromEnv() {
+  const client = String(process.env.ADSENSE_CLIENT || '').trim();
+  if (!validAdsenseClient(client)) return null;
+
+  const slots = Object.fromEntries(
+    Object.entries(adsenseSlots).map(([name, value]) => [name, String(value || '').trim()]),
+  );
+  const invalidSlot = Object.values(slots).find((slot) => !validAdsenseSlot(slot));
+  if (invalidSlot) {
+    throw new Error(`Invalid AdSense slot ID: ${invalidSlot}`);
+  }
+
+  return {
+    ...placeholderAdsConfig(),
+    adsense: {
+      enabled: true,
+      client,
+      autoAds: {
+        enabled: process.env.ADSENSE_AUTO_ADS !== 'false',
+      },
+      slots,
+    },
+  };
+}
+
+async function ensureAdsConfig() {
+  const target = path.join(outDir, 'ads-config.json');
+  const envConfig = adsConfigFromEnv();
+  if (envConfig) {
+    await writeFile(target, `${JSON.stringify(envConfig, null, 2)}\n`);
+    return;
+  }
+
+  try {
+    await readFile(target, 'utf8');
+  } catch {
+    await writeFile(target, `${JSON.stringify(placeholderAdsConfig(), null, 2)}\n`);
+  }
+}
+
+async function ensureAdsTxt() {
+  const target = path.join(outDir, 'ads.txt');
+  const client = String(process.env.ADSENSE_CLIENT || '').trim();
+  if (validAdsenseClient(client)) {
+    await writeFile(target, `google.com, ${client.replace('ca-', '')}, DIRECT, f08c47fec0942fa0\n`);
+    return;
+  }
+
+  try {
+    await readFile(target, 'utf8');
+  } catch {
+    await writeFile(target, `# Google AdSense 승인 후 실제 publisher ID로 아래 예시를 교체하세요.
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+`);
+  }
+}
+
 const seoCss = `:root {
   --ink: #191f28;
   --muted: #6b7684;
@@ -861,9 +963,8 @@ Allow: /
 
 Sitemap: ${new URL('sitemap.xml', siteUrl).href}
 `);
-  await writeFile(path.join(outDir, 'ads.txt'), `# Google AdSense 승인 후 실제 publisher ID로 아래 예시를 교체하세요.
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
-`);
+  await ensureAdsConfig();
+  await ensureAdsTxt();
 }
 
 main().catch((error) => {

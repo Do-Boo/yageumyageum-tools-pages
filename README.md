@@ -54,7 +54,37 @@ The current public SEO URL is `https://yageumyageum-tools-pages.vercel.app/`. Af
 
 AdSense settings live in `public/ads-config.json`.
 
-For Auto ads, fill only the publisher client ID and enable Auto ads:
+After AdSense gives you a publisher client ID, configure the site with:
+
+```bash
+node scripts/configure-adsense.mjs --client ca-pub-0000000000000000
+```
+
+This writes both `public/ads-config.json` and `public/ads.txt`. By default it enables Auto ads. For manual display units, pass the numeric slot IDs:
+
+```bash
+node scripts/configure-adsense.mjs \
+  --client ca-pub-0000000000000000 \
+  --home-top 1111111111 \
+  --tool-top 2222222222 \
+  --article-inline 3333333333 \
+  --article-bottom 4444444444 \
+  --side-left 5555555555 \
+  --side-right 6666666666
+```
+
+For deployment-time configuration, set `ADSENSE_CLIENT` and optional slot environment variables before running `node scripts/build-seo-pages.mjs`:
+
+```bash
+ADSENSE_CLIENT=ca-pub-0000000000000000 \
+ADSENSE_SLOT_TOOL_TOP=2222222222 \
+ADSENSE_SLOT_ARTICLE_INLINE=3333333333 \
+node scripts/build-seo-pages.mjs
+```
+
+The supported slot environment variables are `ADSENSE_SLOT_HOME_TOP`, `ADSENSE_SLOT_TOOL_TOP`, `ADSENSE_SLOT_ARTICLE_INLINE`, `ADSENSE_SLOT_ARTICLE_BOTTOM`, `ADSENSE_SLOT_SIDE_LEFT`, and `ADSENSE_SLOT_SIDE_RIGHT`.
+
+For Auto ads only, the resulting config looks like:
 
 ```json
 {
@@ -70,7 +100,7 @@ For Auto ads, fill only the publisher client ID and enable Auto ads:
 
 For manual ad units, also fill the numeric slot IDs under `adsense.slots`. Empty manual slots are hidden when Auto ads is enabled.
 
-Replace the example in `public/ads.txt` with the AdSense publisher line after AdSense gives you the publisher ID:
+The script writes the required `public/ads.txt` seller line in this format:
 
 ```txt
 google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
