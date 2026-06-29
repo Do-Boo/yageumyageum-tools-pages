@@ -1,9 +1,9 @@
 {
   "adsense": {
-    "enabled": false,
-    "client": "",
+    "enabled": true,
+    "client": "ca-pub-1758284695860255",
     "autoAds": {
-      "enabled": false
+      "enabled": true
     },
     "slots": {
       "homeTop": "",
