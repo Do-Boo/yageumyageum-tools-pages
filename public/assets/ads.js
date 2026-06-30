@@ -8,6 +8,29 @@
     sideTitle: 'AdSense 광고',
     sideDescription: '승인 후 표시됩니다.',
   };
+  const localizedPlaceholders = {
+    en: {
+      label: 'Ad',
+      title: 'Google AdSense Ad Area',
+      description: 'Real ads will appear after AdSense approval.',
+      sideTitle: 'AdSense Ad',
+      sideDescription: 'Shown after approval.',
+    },
+    ja: {
+      label: '広告',
+      title: 'Google AdSense 広告枠',
+      description: 'AdSense 承認後に実際の広告が表示されます。',
+      sideTitle: 'AdSense 広告',
+      sideDescription: '承認後に表示されます。',
+    },
+    zh: {
+      label: '广告',
+      title: 'Google AdSense 广告区域',
+      description: 'AdSense 审核通过后会显示真实广告。',
+      sideTitle: 'AdSense 广告',
+      sideDescription: '审核通过后显示。',
+    },
+  };
   const clientPattern = /^ca-pub-\d+$/;
   const slotPattern = /^\d+$/;
   const runtime = {
@@ -186,6 +209,12 @@
     );
   }
 
+  function activePlaceholder(config) {
+    const lang = (document.documentElement.lang || 'ko').toLowerCase().split('-')[0];
+    const localized = lang === 'ko' ? {} : (localizedPlaceholders[lang] || {});
+    return { ...defaultPlaceholder, ...config?.placeholder, ...localized };
+  }
+
   function canRenderSlot(slot) {
     if (slot.dataset.adPlacement !== 'side') return true;
     return window.matchMedia?.('(min-width: 1540px)').matches === true;
@@ -235,7 +264,7 @@
   }
 
   function renderPlaceholder(slot, config) {
-    const placeholder = { ...defaultPlaceholder, ...config?.placeholder };
+    const placeholder = activePlaceholder(config);
     const title = slot.dataset.adPlacement === 'side' ? placeholder.sideTitle : placeholder.title;
     const description = slot.dataset.adPlacement === 'side' ? placeholder.sideDescription : placeholder.description;
     slot.hidden = false;

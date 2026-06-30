@@ -141,17 +141,60 @@
             transform: translate(-2px, -2px);
             background-color: white;
         }
+
+        .top-nav-inner {
+            max-width: 48rem;
+            height: 4rem;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 72px minmax(0, 1fr) 92px;
+            align-items: center;
+        }
+        .top-nav-actions {
+            min-width: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .top-nav-actions .nav-btn {
+            white-space: nowrap;
+        }
+        .top-language-label {
+            justify-self: end;
+        }
+        @media (min-width: 640px) {
+            .top-nav-inner {
+                padding: 0 1.5rem;
+                grid-template-columns: 96px minmax(0, 1fr) 110px;
+            }
+            .top-nav-actions {
+                gap: 2.5rem;
+            }
+        }
     </style>
 </head>
 <body class="text-toss-grey-800 antialiased selection:bg-toss-grey-800 selection:text-white">
 
     <!-- 상단 네비게이션 -->
     <nav class="fixed top-0 w-full bg-toss-yellow-400 border-b-4 border-toss-grey-900 z-50 transition-all">
-        <div class="max-w-3xl mx-auto px-6 h-16 flex justify-center items-center relative">
-            <div class="flex items-center gap-10">
+        <div class="top-nav-inner">
+            <span aria-hidden="true"></span>
+            <div class="top-nav-actions">
                 <button onclick="navigate('home')" class="nav-btn text-[17px] font-bold text-toss-grey-900 transition-colors" data-view="home">도구 목록</button>
                 <button onclick="navigate('saved')" class="nav-btn text-[17px] font-bold text-toss-grey-700 hover:text-toss-grey-900 transition-colors" data-view="saved">저장함</button>
             </div>
+            <label class="top-language-label">
+                <span class="sr-only">Language</span>
+                <select id="languageSelect" class="n-btn-sm bg-white text-toss-grey-900 text-[12px] px-2 py-1.5 max-w-[92px]">
+                    <option value="auto">Auto</option>
+                    <option value="ko">한국어</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">中文</option>
+                </select>
+            </label>
         </div>
     </nav>
 
@@ -229,11 +272,502 @@
     </div>
 
     <script>
+        const languageStorageKey = 'yageum_tools_language';
+        const supportedLanguages = ['ko', 'en', 'ja', 'zh'];
+        const languageUi = {
+            ko: {
+                htmlLang: 'ko',
+                locale: 'ko-KR',
+                meta: {
+                    title: '야금야금 업무 도구 - 직장인 웹 유틸리티와 AI 문서 도구',
+                    description: '야금야금 업무 도구는 메일 답장, 회의록, 보고서 문장 다듬기, 이미지·PDF·파일·텍스트 정리, 일하는 척 화면까지 한 번에 여는 직장인용 웹 유틸리티입니다.',
+                    ogTitle: '야금야금 업무 도구 - 직장인을 위한 빠른 웹 유틸리티',
+                    ogDescription: '메일 답장, 회의록, 보고서 다듬기, PDF·이미지·텍스트 정리, 일하는 척 화면까지 야금야금 앱에서 바로 여는 업무 도구 모음입니다.',
+                    twitterTitle: '야금야금 업무 도구',
+                    twitterDescription: '직장인용 웹 유틸리티와 AI 문서 도구를 한 화면에서 빠르게 엽니다.',
+                },
+                nav: { home: '도구 목록', saved: '저장함' },
+                home: {
+                    title: '야금야금 업무 도구',
+                    subtitle: '자주 쓰는 웹 유틸리티로 바로 이동',
+                    searchPlaceholder: '도구 이름, 기능 검색',
+                    searchResults: '검색 결과',
+                    noResults: '검색 결과가 없어요.',
+                    utility: '웹 유틸리티 도구',
+                    ai: 'AI 업무 자동화',
+                    fun: '재미',
+                },
+                footer: {
+                    guides: '업무 가이드',
+                    about: '소개',
+                    privacy: '개인정보 처리방침',
+                    terms: '이용약관',
+                    ads: '광고 고지',
+                    contact: '문의',
+                },
+                ai: {
+                    toneLabel: '어조 (말투)',
+                    lengthLabel: '출력 길이',
+                    situationLabel: '어떤 상황인가요?',
+                    placeholder: '육하원칙에 따라 구체적으로 입력할수록 좋습니다.',
+                    generate: 'AI로 생성하기',
+                    result: '생성 결과',
+                    copy: '복사하기',
+                    toneOptions: [
+                        ['정중하고 프로페셔널하게', '정중하고 깍듯하게'],
+                        ['친근하고 부드럽게', '친근하고 부드럽게'],
+                        ['단호하고 명확하게', '단호하고 명확하게'],
+                        ['건조하고 객관적으로', '건조하고 객관적으로'],
+                    ],
+                    lengthOptions: [
+                        ['적당한 길이로', '중간 (기본)'],
+                        ['아주 짧고 간결하게', '짧고 간결하게'],
+                        ['매우 상세하고 길게', '상세하고 길게'],
+                    ],
+                    mockTitle: '[Mockup 결과]',
+                    mockSituation: '상황',
+                    mockOption: '옵션',
+                    mockNotice: 'GitHub Pages 공개 배포본에서는 API 키를 클라이언트에 포함하지 않습니다.',
+                    missingInput: '상황을 입력해주세요.',
+                },
+                saved: {
+                    title: '저장함',
+                    subtitle: '생성했던 결과물들',
+                    empty: '저장된 내역이 없습니다.',
+                    copy: '복사하기',
+                },
+                fake: {
+                    subtitle: '필요할 때 바로 띄우는 바쁜 화면',
+                    code: '코딩 화면',
+                    document: '문서 화면',
+                    email: '메일 화면',
+                    meeting: '회의 화면',
+                    open: '열기',
+                },
+                ads: { label: '광고', left: '왼쪽 광고', right: '오른쪽 광고', tool: '광고' },
+                messages: {
+                    toolNotFound: '도구를 찾을 수 없습니다.',
+                    preparing: '해당 기능은 열심히 준비 중입니다!',
+                    affiliate: '제휴 페이지로 이동합니다. (Mockup)',
+                    copied: '복사되었습니다.',
+                    failed: '실패했습니다.',
+                    genericError: '오류가 발생했습니다.',
+                },
+                dropZoneDefault: '여기를 클릭해서 파일을 선택하세요.',
+                tools: {
+                    'img-tool': { name: '이미지 도구', desc: '포맷 변환, 크기 조절, 그리기/자르기' },
+                    'pdf-tool': { name: 'PDF 도구', desc: '합치기, 분할, 뷰어/형광펜, 용량 압축' },
+                    'file-tool': { name: '파일 도구', desc: '접두사/접미사 일괄 파일명 변경' },
+                    'text-tool': { name: '텍스트 정리', desc: '글자 수 세기, 공백/특수문자 제거' },
+                    'link-tool': { name: '링크 정리', desc: '단축 URL 생성, UTM 제거, 인코딩' },
+                    'qr-tool': { name: 'QR 만들기', desc: '색상 및 크기 지정 가능 QR 생성' },
+                    'schedule-tool': { name: '일정관리', desc: '업무 일정과 오늘 할 일 (우선순위)' },
+                    'email-reply': { name: '메일 답장 생성기', desc: '정중하고 프로페셔널한 이메일 작성' },
+                    'meeting-notes': { name: '회의록 생성기', desc: '회의 내용 요약 및 액션 아이템 도출' },
+                    'report-refine': { name: '보고서 문장 다듬기', desc: '대충 쓴 초안을 격식있는 보고서 톤으로' },
+                    'status-msg': { name: '상태 메시지 생성기', desc: '센스있는 직장 메신저 상태 문구 작성' },
+                    'work-log': { name: '업무일지 생성기', desc: '오늘 하루 한 일을 깔끔한 일지로 정리' },
+                    'task-split': { name: '일정/할 일 쪼개기', desc: '큰 업무를 당장 실행 가능한 단위로 분할' },
+                    'buffer-msg': { name: '방어/완충 문구 생성', desc: '상대를 불쾌하게 하지 않고 거절하기' },
+                    'fake-work': { name: '일하는 척 하기', desc: '코딩, 문서, 회의 등 가짜 바쁜 화면 띄우기' },
+                },
+            },
+            en: {
+                htmlLang: 'en',
+                locale: 'en-US',
+                meta: {
+                    title: 'Yageumyageum Work Tools - Web Utilities and AI Document Tools',
+                    description: 'Yageumyageum Work Tools brings email replies, meeting notes, report polish, image, PDF, file, text cleanup, and look-busy screens into one workplace utility hub.',
+                    ogTitle: 'Yageumyageum Work Tools - Fast Web Utilities for Office Work',
+                    ogDescription: 'Open email replies, meeting notes, report polishing, PDF, image, text cleanup, and look-busy screens from one work utility hub.',
+                    twitterTitle: 'Yageumyageum Work Tools',
+                    twitterDescription: 'Quick web utilities and AI document helpers for office work.',
+                },
+                nav: { home: 'Tools', saved: 'Saved' },
+                home: {
+                    title: 'Yageumyageum Work Tools',
+                    subtitle: 'Jump straight to everyday web utilities',
+                    searchPlaceholder: 'Search tools or features',
+                    searchResults: 'Search Results',
+                    noResults: 'No matching tools.',
+                    utility: 'Web Utility Tools',
+                    ai: 'AI Work Automation',
+                    fun: 'Fun',
+                },
+                footer: {
+                    guides: 'Guides',
+                    about: 'About',
+                    privacy: 'Privacy Policy',
+                    terms: 'Terms',
+                    ads: 'Ads Disclosure',
+                    contact: 'Contact',
+                },
+                ai: {
+                    toneLabel: 'Tone',
+                    lengthLabel: 'Length',
+                    situationLabel: 'What is the situation?',
+                    placeholder: 'Add concrete context, people, timing, and desired outcome.',
+                    generate: 'Generate with AI',
+                    result: 'Generated Result',
+                    copy: 'Copy',
+                    toneOptions: [
+                        ['polite and professional', 'Polite and formal'],
+                        ['friendly and soft', 'Friendly and soft'],
+                        ['firm and clear', 'Firm and clear'],
+                        ['dry and objective', 'Dry and objective'],
+                    ],
+                    lengthOptions: [
+                        ['at a moderate length', 'Medium (default)'],
+                        ['very short and concise', 'Short and concise'],
+                        ['very detailed and long', 'Detailed and long'],
+                    ],
+                    mockTitle: '[Mockup Result]',
+                    mockSituation: 'Situation',
+                    mockOption: 'Options',
+                    mockNotice: 'The public deployment does not include API keys in client-side code.',
+                    missingInput: 'Please describe the situation.',
+                },
+                saved: {
+                    title: 'Saved',
+                    subtitle: 'Generated outputs',
+                    empty: 'No saved history yet.',
+                    copy: 'Copy',
+                },
+                fake: {
+                    subtitle: 'Open a busy-looking screen when you need one',
+                    code: 'Code Screen',
+                    document: 'Document Screen',
+                    email: 'Email Screen',
+                    meeting: 'Meeting Screen',
+                    open: 'Open',
+                },
+                ads: { label: 'Ad', left: 'Left ad', right: 'Right ad', tool: 'ad' },
+                messages: {
+                    toolNotFound: 'Tool not found.',
+                    preparing: 'This feature is still being prepared.',
+                    affiliate: 'Opening affiliate page. (Mockup)',
+                    copied: 'Copied.',
+                    failed: 'Failed.',
+                    genericError: 'Something went wrong.',
+                },
+                dropZoneDefault: 'Click here to choose a file.',
+                tools: {
+                    'img-tool': { name: 'Image Tools', desc: 'Convert formats, resize, draw/crop' },
+                    'pdf-tool': { name: 'PDF Tools', desc: 'Merge, split, view/highlight, compress' },
+                    'file-tool': { name: 'File Tools', desc: 'Batch rename with prefixes/suffixes' },
+                    'text-tool': { name: 'Text Cleanup', desc: 'Count characters, remove spaces/special chars' },
+                    'link-tool': { name: 'Link Cleanup', desc: 'Short URLs, remove UTM, encode' },
+                    'qr-tool': { name: 'QR Maker', desc: 'Create QR codes with custom color and size' },
+                    'schedule-tool': { name: 'Schedule Planner', desc: "Work schedules and today's priority tasks" },
+                    'email-reply': { name: 'Email Reply Generator', desc: 'Write polite, professional business emails' },
+                    'meeting-notes': { name: 'Meeting Notes Generator', desc: 'Summaries, decisions, and action items' },
+                    'report-refine': { name: 'Report Copy Refiner', desc: 'Turn rough drafts into formal report text' },
+                    'status-msg': { name: 'Status Message Generator', desc: 'Smart workplace messenger status lines' },
+                    'work-log': { name: 'Work Log Generator', desc: 'Turn your day into a clean work log' },
+                    'task-split': { name: 'Task Splitter', desc: 'Break big work into small next steps' },
+                    'buffer-msg': { name: 'Buffer Message Generator', desc: 'Decline or buy time without sounding harsh' },
+                    'fake-work': { name: 'Look Busy', desc: 'Show fake coding, document, or meeting screens' },
+                },
+            },
+            ja: {
+                htmlLang: 'ja',
+                locale: 'ja-JP',
+                meta: {
+                    title: 'ヤグムヤグム業務ツール - WebユーティリティとAI文書ツール',
+                    description: 'ヤグムヤグム業務ツールは、メール返信、議事録、報告書の文章調整、画像・PDF・ファイル・テキスト整理、仕事中風の画面をまとめて使える業務向けWebツールです。',
+                    ogTitle: 'ヤグムヤグム業務ツール - 仕事向けの高速Webユーティリティ',
+                    ogDescription: 'メール返信、議事録、報告書調整、PDF・画像・テキスト整理、仕事中風画面を一つの画面から開けます。',
+                    twitterTitle: 'ヤグムヤグム業務ツール',
+                    twitterDescription: '仕事向けWebユーティリティとAI文書ツールをすばやく開けます。',
+                },
+                nav: { home: 'ツール', saved: '保存' },
+                home: {
+                    title: 'ヤグムヤグム業務ツール',
+                    subtitle: 'よく使うWebユーティリティへすぐ移動',
+                    searchPlaceholder: 'ツール名・機能を検索',
+                    searchResults: '検索結果',
+                    noResults: '該当するツールがありません。',
+                    utility: 'Webユーティリティ',
+                    ai: 'AI業務自動化',
+                    fun: 'おまけ',
+                },
+                footer: {
+                    guides: '業務ガイド',
+                    about: '紹介',
+                    privacy: 'プライバシーポリシー',
+                    terms: '利用規約',
+                    ads: '広告表示',
+                    contact: 'お問い合わせ',
+                },
+                ai: {
+                    toneLabel: 'トーン',
+                    lengthLabel: '出力の長さ',
+                    situationLabel: 'どんな状況ですか？',
+                    placeholder: '誰が、いつ、何を、どうしたいかを具体的に入力してください。',
+                    generate: 'AIで生成',
+                    result: '生成結果',
+                    copy: 'コピー',
+                    toneOptions: [
+                        ['丁寧でプロフェッショナルに', '丁寧でフォーマル'],
+                        ['親しみやすく柔らかく', '親しみやすく柔らかく'],
+                        ['きっぱり明確に', 'きっぱり明確に'],
+                        ['淡々と客観的に', '淡々と客観的に'],
+                    ],
+                    lengthOptions: [
+                        ['適度な長さで', '中くらい（基本）'],
+                        ['短く簡潔に', '短く簡潔に'],
+                        ['詳しく長めに', '詳しく長めに'],
+                    ],
+                    mockTitle: '[モック結果]',
+                    mockSituation: '状況',
+                    mockOption: 'オプション',
+                    mockNotice: '公開版ではAPIキーをクライアントコードに含めていません。',
+                    missingInput: '状況を入力してください。',
+                },
+                saved: {
+                    title: '保存',
+                    subtitle: '生成した結果',
+                    empty: '保存された履歴はありません。',
+                    copy: 'コピー',
+                },
+                fake: {
+                    subtitle: '必要なときに仕事中風の画面を開く',
+                    code: 'コード画面',
+                    document: '文書画面',
+                    email: 'メール画面',
+                    meeting: '会議画面',
+                    open: '開く',
+                },
+                ads: { label: '広告', left: '左広告', right: '右広告', tool: '広告' },
+                messages: {
+                    toolNotFound: 'ツールが見つかりません。',
+                    preparing: 'この機能は準備中です。',
+                    affiliate: '提携ページへ移動します。（モック）',
+                    copied: 'コピーしました。',
+                    failed: '失敗しました。',
+                    genericError: 'エラーが発生しました。',
+                },
+                dropZoneDefault: 'ここをクリックしてファイルを選択してください。',
+                tools: {
+                    'img-tool': { name: '画像ツール', desc: '形式変換、サイズ変更、描画/切り抜き' },
+                    'pdf-tool': { name: 'PDFツール', desc: '結合、分割、ビューア/ハイライト、圧縮' },
+                    'file-tool': { name: 'ファイルツール', desc: '接頭辞/接尾辞で一括リネーム' },
+                    'text-tool': { name: 'テキスト整理', desc: '文字数計算、空白/特殊文字の削除' },
+                    'link-tool': { name: 'リンク整理', desc: '短縮URL、UTM削除、エンコード' },
+                    'qr-tool': { name: 'QR作成', desc: '色とサイズを指定してQRを作成' },
+                    'schedule-tool': { name: 'スケジュール管理', desc: '業務予定と今日の優先タスク' },
+                    'email-reply': { name: 'メール返信生成', desc: '丁寧なビジネスメールを作成' },
+                    'meeting-notes': { name: '議事録生成', desc: '要約、決定事項、アクション整理' },
+                    'report-refine': { name: '報告文の整え', desc: 'ラフな下書きを報告書トーンに調整' },
+                    'status-msg': { name: 'ステータス文生成', desc: '職場メッセンジャー向けの一言' },
+                    'work-log': { name: '業務日誌生成', desc: '今日の作業を見やすい日誌に整理' },
+                    'task-split': { name: 'タスク分解', desc: '大きな仕事をすぐ動ける単位へ分割' },
+                    'buffer-msg': { name: 'やんわり断る文生成', desc: '角を立てずに断る・時間を稼ぐ' },
+                    'fake-work': { name: '仕事中っぽく見せる', desc: 'コード、文書、会議風の画面を表示' },
+                },
+            },
+            zh: {
+                htmlLang: 'zh-CN',
+                locale: 'zh-CN',
+                meta: {
+                    title: 'Yageumyageum 办公工具 - Web 实用工具与 AI 文档工具',
+                    description: 'Yageumyageum 办公工具集合了邮件回复、会议纪要、报告润色、图片、PDF、文件、文本整理和假装忙碌页面，适合日常办公使用。',
+                    ogTitle: 'Yageumyageum 办公工具 - 快速办公 Web 实用工具',
+                    ogDescription: '在一个页面打开邮件回复、会议纪要、报告润色、PDF、图片、文本整理和假装忙碌页面。',
+                    twitterTitle: 'Yageumyageum 办公工具',
+                    twitterDescription: '面向办公场景的 Web 实用工具和 AI 文档助手。',
+                },
+                nav: { home: '工具', saved: '已保存' },
+                home: {
+                    title: 'Yageumyageum 办公工具',
+                    subtitle: '快速打开常用 Web 实用工具',
+                    searchPlaceholder: '搜索工具或功能',
+                    searchResults: '搜索结果',
+                    noResults: '没有匹配的工具。',
+                    utility: 'Web 实用工具',
+                    ai: 'AI 办公自动化',
+                    fun: '趣味工具',
+                },
+                footer: {
+                    guides: '办公指南',
+                    about: '关于',
+                    privacy: '隐私政策',
+                    terms: '服务条款',
+                    ads: '广告说明',
+                    contact: '联系',
+                },
+                ai: {
+                    toneLabel: '语气',
+                    lengthLabel: '输出长度',
+                    situationLabel: '现在是什么情况？',
+                    placeholder: '请尽量写清楚人物、时间、背景和希望达到的结果。',
+                    generate: '用 AI 生成',
+                    result: '生成结果',
+                    copy: '复制',
+                    toneOptions: [
+                        ['礼貌且专业', '礼貌正式'],
+                        ['亲切柔和', '亲切柔和'],
+                        ['坚定明确', '坚定明确'],
+                        ['客观简洁', '客观简洁'],
+                    ],
+                    lengthOptions: [
+                        ['中等长度', '中等（默认）'],
+                        ['非常简短', '简短'],
+                        ['详细一些', '详细'],
+                    ],
+                    mockTitle: '[模拟结果]',
+                    mockSituation: '情况',
+                    mockOption: '选项',
+                    mockNotice: '公开部署版本不会在客户端代码中包含 API 密钥。',
+                    missingInput: '请输入情况说明。',
+                },
+                saved: {
+                    title: '已保存',
+                    subtitle: '生成过的内容',
+                    empty: '还没有保存记录。',
+                    copy: '复制',
+                },
+                fake: {
+                    subtitle: '需要时快速打开看起来很忙的页面',
+                    code: '代码页面',
+                    document: '文档页面',
+                    email: '邮件页面',
+                    meeting: '会议页面',
+                    open: '打开',
+                },
+                ads: { label: '广告', left: '左侧广告', right: '右侧广告', tool: '广告' },
+                messages: {
+                    toolNotFound: '找不到该工具。',
+                    preparing: '该功能仍在准备中。',
+                    affiliate: '正在打开合作页面。（模拟）',
+                    copied: '已复制。',
+                    failed: '失败。',
+                    genericError: '发生错误。',
+                },
+                dropZoneDefault: '点击此处选择文件。',
+                tools: {
+                    'img-tool': { name: '图片工具', desc: '格式转换、调整大小、绘图/裁剪' },
+                    'pdf-tool': { name: 'PDF 工具', desc: '合并、拆分、查看/高亮、压缩' },
+                    'file-tool': { name: '文件工具', desc: '批量添加前缀/后缀并重命名' },
+                    'text-tool': { name: '文本整理', desc: '字数统计、删除空格/特殊字符' },
+                    'link-tool': { name: '链接整理', desc: '短链接、移除 UTM、编码' },
+                    'qr-tool': { name: '生成 QR', desc: '可指定颜色和大小的二维码' },
+                    'schedule-tool': { name: '日程管理', desc: '工作日程和今日优先任务' },
+                    'email-reply': { name: '邮件回复生成器', desc: '生成礼貌专业的商务邮件' },
+                    'meeting-notes': { name: '会议纪要生成器', desc: '整理摘要、决定事项和行动项' },
+                    'report-refine': { name: '报告润色', desc: '把草稿改成正式报告语气' },
+                    'status-msg': { name: '状态消息生成器', desc: '生成职场聊天状态文案' },
+                    'work-log': { name: '工作日志生成器', desc: '把一天工作整理成清晰日志' },
+                    'task-split': { name: '任务拆分器', desc: '把大任务拆成可执行小步骤' },
+                    'buffer-msg': { name: '缓冲话术生成器', desc: '委婉拒绝或争取时间' },
+                    'fake-work': { name: '假装忙碌', desc: '显示代码、文档、会议等忙碌页面' },
+                },
+            },
+        };
+
+        function getStoredLanguageSetting() {
+            try {
+                const saved = localStorage.getItem(languageStorageKey);
+                return saved === 'auto' || supportedLanguages.includes(saved) ? saved : 'auto';
+            } catch (error) {
+                return 'auto';
+            }
+        }
+
+        function normalizeLanguage(value) {
+            const code = String(value || '').toLowerCase();
+            if (code.startsWith('ko')) return 'ko';
+            if (code.startsWith('ja')) return 'ja';
+            if (code.startsWith('zh')) return 'zh';
+            if (code.startsWith('en')) return 'en';
+            return null;
+        }
+
+        function detectBrowserLanguage() {
+            const candidates = Array.isArray(navigator.languages) && navigator.languages.length > 0 ? navigator.languages : [navigator.language];
+            for (const candidate of candidates) {
+                const normalized = normalizeLanguage(candidate);
+                if (normalized) return normalized;
+            }
+            return 'ko';
+        }
+
+        function resolveLanguage(setting) {
+            return setting === 'auto' ? detectBrowserLanguage() : (supportedLanguages.includes(setting) ? setting : 'ko');
+        }
+
+        function translate(path) {
+            const keys = path.split('.');
+            const lookup = (dict) => keys.reduce((acc, key) => acc && acc[key], dict);
+            return lookup(languageUi[state.language]) ?? lookup(languageUi.ko) ?? path;
+        }
+
+        function localizeTool(tool) {
+            if (!tool) return tool;
+            const translation = languageUi[state.language]?.tools?.[tool.id] || languageUi.ko.tools[tool.id] || {};
+            return { ...tool, ...translation };
+        }
+
+        function normalizedSearchText(value) {
+            return String(value || '').toLocaleLowerCase();
+        }
+
+        function toolMatchesSearch(tool, localizedTool, query) {
+            if (!query) return true;
+            return [tool?.name, tool?.desc, localizedTool?.name, localizedTool?.desc]
+                .some(value => normalizedSearchText(value).includes(query));
+        }
+
+        function setMeta(selector, content) {
+            const element = document.querySelector(selector);
+            if (element) element.setAttribute('content', content);
+        }
+
+        function applyDocumentLanguage() {
+            const ui = languageUi[state.language] || languageUi.ko;
+            document.documentElement.lang = ui.htmlLang;
+            document.title = ui.meta.title;
+            setMeta('meta[name="description"]', ui.meta.description);
+            setMeta('meta[property="og:locale"]', ui.locale.replace('-', '_'));
+            setMeta('meta[property="og:title"]', ui.meta.ogTitle);
+            setMeta('meta[property="og:description"]', ui.meta.ogDescription);
+            setMeta('meta[name="twitter:title"]', ui.meta.twitterTitle);
+            setMeta('meta[name="twitter:description"]', ui.meta.twitterDescription);
+
+            const leftAd = document.querySelector('[data-ad-side="left"]');
+            const rightAd = document.querySelector('[data-ad-side="right"]');
+            if (leftAd) leftAd.setAttribute('aria-label', translate('ads.left'));
+            if (rightAd) rightAd.setAttribute('aria-label', translate('ads.right'));
+
+            const languageSelect = document.getElementById('languageSelect');
+            if (languageSelect) languageSelect.value = state.languageSetting;
+        }
+
+        function resetAdSlotsForLanguageChange() {
+            document.querySelectorAll('[data-ad-slot-name]').forEach((slot) => {
+                slot.removeAttribute('data-ad-rendered');
+                if (slot.dataset.adPlacement === 'side') slot.innerHTML = '';
+            });
+        }
+
+        function setLanguagePreference(setting) {
+            state.languageSetting = setting === 'auto' || supportedLanguages.includes(setting) ? setting : 'auto';
+            state.language = resolveLanguage(state.languageSetting);
+            try {
+                if (state.languageSetting === 'auto') localStorage.removeItem(languageStorageKey);
+                else localStorage.setItem(languageStorageKey, state.languageSetting);
+            } catch (error) {}
+            resetAdSlotsForLanguageChange();
+            renderView();
+        }
+
         const state = {
             currentView: 'home',
             currentTool: null,
             searchQuery: '',
             pdfMode: 'merge',
+            languageSetting: getStoredLanguageSetting(),
+            language: resolveLanguage(getStoredLanguageSetting()),
             history: JSON.parse(localStorage.getItem('work_survival_history') || '[]'),
             tools: [
                 { id: 'img-tool', name: '이미지 도구', category: 'utility', desc: '포맷 변환, 크기 조절, 그리기/자르기', icon: 'image', bg: 'bg-toss-yellow-400', color: 'text-toss-grey-900', type: 'utility' },
@@ -270,6 +804,15 @@
         state.tools.forEach(t => { if(t.badge === '준비중') t.badge = null; });
 
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('languageSelect')?.addEventListener('change', (event) => {
+                setLanguagePreference(event.target.value);
+            });
+            window.addEventListener('languagechange', () => {
+                if (state.languageSetting !== 'auto') return;
+                state.language = detectBrowserLanguage();
+                resetAdSlotsForLanguageChange();
+                renderView();
+            });
             applyInitialRouteFromURL();
             renderView();
         });
@@ -291,7 +834,7 @@
                         <i data-lucide="upload-cloud" class="w-6 h-6 text-toss-grey-900 pointer-events-none"></i>
                     </div>
                     <p class="text-[15px] font-bold text-toss-grey-900 mb-1 pointer-events-none">${title}</p>
-                    <p class="text-[13px] text-toss-grey-500 font-bold pointer-events-none">${desc || '여기를 클릭해서 파일을 선택하세요.'}</p>
+                    <p class="text-[13px] text-toss-grey-500 font-bold pointer-events-none">${desc || translate('dropZoneDefault')}</p>
                     <input type="file" id="${id}" accept="${accept}" ${multiple ? 'multiple' : ''} onchange="${onChangeStr}" onclick="event.stopPropagation()" class="hidden">
                 </div>
             `;
@@ -300,9 +843,9 @@
         function navigate(view, toolId = null) {
             if (toolId) {
                 const selectedTool = state.tools.find(t => t.id === toolId);
-                if (!selectedTool) return showToast('도구를 찾을 수 없습니다.', 'default');
-                if (selectedTool.badge === '준비중') return showToast('해당 기능은 열심히 준비 중입니다!', 'default');
-                if (selectedTool.badge === '제휴') return showToast('제휴 페이지로 이동합니다. (Mockup)', 'default');
+                if (!selectedTool) return showToast(translate('messages.toolNotFound'), 'default');
+                if (selectedTool.badge === '준비중') return showToast(translate('messages.preparing'), 'default');
+                if (selectedTool.badge === '제휴') return showToast(translate('messages.affiliate'), 'default');
                 state.currentTool = selectedTool;
             }
             state.currentView = view;
@@ -341,6 +884,10 @@
         }
 
         function updateNavUI() {
+            const homeNav = document.querySelector('.nav-btn[data-view="home"]');
+            const savedNav = document.querySelector('.nav-btn[data-view="saved"]');
+            if (homeNav) homeNav.textContent = translate('nav.home');
+            if (savedNav) savedNav.textContent = translate('nav.saved');
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 if (btn.dataset.view === state.currentView || (state.currentView === 'tool' && btn.dataset.view === 'home')) {
                     btn.classList.add('text-toss-grey-900'); btn.classList.remove('text-toss-grey-700');
@@ -362,14 +909,20 @@
                 case 'saved': html = renderSaved(); break;
             }
             app.innerHTML = html;
+            applyDocumentLanguage();
             lucide.createIcons();
             updateNavUI();
             attachEventListeners();
-            if (window.yageumAds?.render) window.yageumAds.render(app);
+            if (window.yageumAds?.render) window.yageumAds.render(document);
         }
 
         function renderHome() {
-            const filteredTools = state.tools.filter(t => t.name.includes(state.searchQuery) || t.desc.includes(state.searchQuery));
+            const localizedTools = state.tools.map(tool => localizeTool(tool));
+            const searchQuery = normalizedSearchText(state.searchQuery.trim());
+            const filteredTools = localizedTools.filter(tool => {
+                const baseTool = state.tools.find(base => base.id === tool.id);
+                return toolMatchesSearch(baseTool, tool, searchQuery);
+            });
             const cardGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
             const renderCards = (list) => list.map(tool => `
                 <a href="${toolPagePaths[tool.id] || `?tool=${tool.id}`}" onclick="handleToolCardClick(event, '${tool.id}')" class="n-card n-card-hover cursor-pointer p-[16px] flex items-start gap-3 group h-full min-h-[132px]">
@@ -378,7 +931,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
-                            <h3 class="min-w-0 text-[15px] md:text-[16px] font-bold text-toss-grey-900 truncate tracking-tight">${tool.name}</h3>
+                            <h3 class="min-w-0 text-[15px] md:text-[16px] font-bold text-toss-grey-900 truncate tracking-normal">${tool.name}</h3>
                             ${tool.badge ? `<span class="flex-shrink-0 px-2.5 py-0.5 text-[11px] font-bold rounded-[6px] n-border-sm bg-toss-yellow-400 text-toss-grey-900">${tool.badge}</span>` : ''}
                         </div>
                         <p class="text-[13px] text-toss-grey-600 font-bold leading-snug line-clamp-2">${tool.desc}</p>
@@ -392,28 +945,28 @@
             return `
                 <div class="fade-enter max-w-[1180px] mx-auto w-full px-5 md:px-6">
                     <section class="pt-8 pb-8">
-                        <h1 class="max-w-[640px] text-[28px] md:text-[32px] font-bold text-toss-grey-900 mb-6 tracking-tight leading-tight">야금야금 업무 도구<br><span class="text-[16px] text-toss-grey-600 font-bold tracking-normal">자주 쓰는 웹 유틸리티로 바로 이동</span></h1>
+                        <h1 class="max-w-[640px] text-[28px] md:text-[32px] font-bold text-toss-grey-900 mb-6 tracking-normal leading-tight">${translate('home.title')}<br><span class="text-[16px] text-toss-grey-600 font-bold tracking-normal">${translate('home.subtitle')}</span></h1>
                         <div class="relative max-w-[860px]">
                             <i data-lucide="search" class="absolute left-5 top-1/2 -translate-y-1/2 w-[22px] h-[22px] text-toss-grey-400"></i>
-                            <input type="text" id="searchInput" placeholder="도구 이름, 기능 검색" value="${state.searchQuery}"
+                            <input type="text" id="searchInput" placeholder="${translate('home.searchPlaceholder')}" value="${escapeHtml(state.searchQuery)}"
                                 class="w-full n-input py-[16px] pl-14 pr-5 text-[16px] font-bold text-toss-grey-900 placeholder-toss-grey-400">
                         </div>
                     </section>
-                    ${state.searchQuery === '' ? `<aside class="mb-8" data-ad-slot-name="homeTop" aria-label="광고"></aside>` : ''}
+                    ${state.searchQuery === '' ? `<aside class="mb-8" data-ad-slot-name="homeTop" aria-label="${translate('ads.label')}"></aside>` : ''}
                     ${state.searchQuery ? `
-                        <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1">검색 결과</h2>
-                        ${filteredTools.length > 0 ? `<div class="${cardGridClass}">${renderCards(filteredTools)}</div>` : `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">검색 결과가 없어요.</p></div>`}</section>
+                        <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1">${translate('home.searchResults')}</h2>
+                        ${filteredTools.length > 0 ? `<div class="${cardGridClass}">${renderCards(filteredTools)}</div>` : `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">${translate('home.noResults')}</p></div>`}</section>
                     ` : `
-                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="wrench" class="w-5 h-5"></i> 웹 유틸리티 도구</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='utility'))}</div></section>
-                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-toss-blue-500"></i> AI 업무 자동화</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='ai'))}</div></section>
-                        <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5"></i> 재미</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='fun'))}</div></section>
+                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="wrench" class="w-5 h-5"></i> ${translate('home.utility')}</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='utility'))}</div></section>
+                        <section class="mb-10"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-toss-blue-500"></i> ${translate('home.ai')}</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='ai'))}</div></section>
+                        <section class="mb-14"><h2 class="text-[18px] font-bold text-toss-grey-900 mb-4 ml-1 flex items-center gap-2"><i data-lucide="gamepad-2" class="w-5 h-5"></i> ${translate('home.fun')}</h2><div class="${cardGridClass}">${renderCards(filteredTools.filter(t=>t.category==='fun'))}</div></section>
                         <footer class="border-t border-toss-grey-900 pt-8 pb-4 flex flex-wrap gap-3 text-[13px] font-bold text-toss-grey-700">
-                            <a href="guides/" class="hover:text-toss-grey-900">업무 가이드</a>
-                            <a href="about/" class="hover:text-toss-grey-900">소개</a>
-                            <a href="privacy/" class="hover:text-toss-grey-900">개인정보 처리방침</a>
-                            <a href="terms/" class="hover:text-toss-grey-900">이용약관</a>
-                            <a href="affiliate-disclosure/" class="hover:text-toss-grey-900">광고 고지</a>
-                            <a href="contact/" class="hover:text-toss-grey-900">문의</a>
+                            <a href="guides/" class="hover:text-toss-grey-900">${translate('footer.guides')}</a>
+                            <a href="about/" class="hover:text-toss-grey-900">${translate('footer.about')}</a>
+                            <a href="privacy/" class="hover:text-toss-grey-900">${translate('footer.privacy')}</a>
+                            <a href="terms/" class="hover:text-toss-grey-900">${translate('footer.terms')}</a>
+                            <a href="affiliate-disclosure/" class="hover:text-toss-grey-900">${translate('footer.ads')}</a>
+                            <a href="contact/" class="hover:text-toss-grey-900">${translate('footer.contact')}</a>
                         </footer>
                     `}
                 </div>
@@ -421,7 +974,9 @@
         }
 
         function renderAITool() {
-            const tool = state.currentTool;
+            const tool = localizeTool(state.currentTool);
+            const toneOptions = translate('ai.toneOptions').map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
+            const lengthOptions = translate('ai.lengthOptions').map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
             return `
                 <div class="fade-enter max-w-[700px] mx-auto w-full px-5">
                     <header class="flex items-center mb-8 mt-4">
@@ -434,36 +989,31 @@
                     <section class="n-card p-6 mb-6">
                         <div class="flex flex-col sm:flex-row gap-4 mb-5">
                             <div class="flex-1">
-                                <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">어조 (말투)</label>
+                                <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">${translate('ai.toneLabel')}</label>
                                 <select id="aiTone" class="w-full n-input p-3 text-[14px] font-bold text-toss-grey-900">
-                                    <option value="정중하고 프로페셔널하게">정중하고 깍듯하게</option>
-                                    <option value="친근하고 부드럽게">친근하고 부드럽게</option>
-                                    <option value="단호하고 명확하게">단호하고 명확하게</option>
-                                    <option value="건조하고 객관적으로">건조하고 객관적으로</option>
+                                    ${toneOptions}
                                 </select>
                             </div>
                             <div class="flex-1">
-                                <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">출력 길이</label>
+                                <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">${translate('ai.lengthLabel')}</label>
                                 <select id="aiLength" class="w-full n-input p-3 text-[14px] font-bold text-toss-grey-900">
-                                    <option value="적당한 길이로">중간 (기본)</option>
-                                    <option value="아주 짧고 간결하게">짧고 간결하게</option>
-                                    <option value="매우 상세하고 길게">상세하고 길게</option>
+                                    ${lengthOptions}
                                 </select>
                             </div>
                         </div>
                         <div class="mb-6">
-                            <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">어떤 상황인가요?</label>
-                            <textarea id="aiInput" rows="4" class="w-full n-input p-4 text-[15px] font-bold text-toss-grey-900 placeholder-toss-grey-400" placeholder="육하원칙에 따라 구체적으로 입력할수록 좋습니다."></textarea>
+                            <label class="block text-[14px] font-bold text-toss-grey-900 mb-2">${translate('ai.situationLabel')}</label>
+                            <textarea id="aiInput" rows="4" class="w-full n-input p-4 text-[15px] font-bold text-toss-grey-900 placeholder-toss-grey-400" placeholder="${translate('ai.placeholder')}"></textarea>
                         </div>
                         <button id="generateBtn" class="w-full n-btn bg-toss-blue-500 text-white text-[17px] py-[16px] flex items-center justify-center gap-2">
-                            <i data-lucide="sparkles" class="w-5 h-5"></i> AI로 생성하기
+                            <i data-lucide="sparkles" class="w-5 h-5"></i> ${translate('ai.generate')}
                         </button>
                     </section>
 
                     <section id="resultArea" class="hidden n-card p-6 bg-toss-blue-50 fade-enter">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-toss-grey-900 text-[16px]">생성 결과</h3>
-                            <button id="copyBtn" class="hidden n-btn-sm bg-white text-toss-grey-900 px-3 py-2 text-[13px]">복사하기</button>
+                            <h3 class="font-bold text-toss-grey-900 text-[16px]">${translate('ai.result')}</h3>
+                            <button id="copyBtn" class="hidden n-btn-sm bg-white text-toss-grey-900 px-3 py-2 text-[13px]">${translate('ai.copy')}</button>
                         </div>
                         <div class="bg-white n-border rounded-[16px] p-5">
                             <div id="loadingSkeleton" class="hidden animate-pulse space-y-3">
@@ -479,15 +1029,15 @@
         }
 
         function renderUtilityTool() {
-            const tool = state.currentTool;
+            const tool = localizeTool(state.currentTool);
             let contentHtml = '';
-            if (tool.id === 'text-tool') contentHtml = renderTextToolUI();
-            else if (tool.id === 'link-tool') contentHtml = renderLinkToolUI();
-            else if (tool.id === 'qr-tool') contentHtml = renderQrToolUI();
-            else if (tool.id === 'schedule-tool') contentHtml = renderScheduleToolUI();
-            else if (tool.id === 'img-tool') contentHtml = renderImageToolUI();
-            else if (tool.id === 'pdf-tool') contentHtml = renderPdfToolUI();
-            else if (tool.id === 'file-tool') contentHtml = renderFileToolUI();
+            if (state.currentTool.id === 'text-tool') contentHtml = renderTextToolUI();
+            else if (state.currentTool.id === 'link-tool') contentHtml = renderLinkToolUI();
+            else if (state.currentTool.id === 'qr-tool') contentHtml = renderQrToolUI();
+            else if (state.currentTool.id === 'schedule-tool') contentHtml = renderScheduleToolUI();
+            else if (state.currentTool.id === 'img-tool') contentHtml = renderImageToolUI();
+            else if (state.currentTool.id === 'pdf-tool') contentHtml = renderPdfToolUI();
+            else if (state.currentTool.id === 'file-tool') contentHtml = renderFileToolUI();
 
             return `
                 <div class="fade-enter max-w-[700px] mx-auto w-full px-5">
@@ -497,8 +1047,44 @@
                         </button>
                         <h1 class="text-[22px] font-bold text-toss-grey-900 ml-3">${tool.name}</h1>
                     </header>
-                    <aside class="mb-6" data-ad-slot-name="toolTop" aria-label="${tool.name} 광고"></aside>
+                    <aside class="mb-6" data-ad-slot-name="toolTop" aria-label="${tool.name} ${translate('ads.tool')}"></aside>
                     ${contentHtml}
+                </div>
+            `;
+        }
+
+        function renderFakeWork() {
+            const tool = localizeTool(state.currentTool);
+            const cards = [
+                { type: 'code', icon: 'square-terminal', label: translate('fake.code') },
+                { type: 'doc', icon: 'file-text', label: translate('fake.document') },
+                { type: 'email', icon: 'mail', label: translate('fake.email') },
+                { type: 'meeting', icon: 'video', label: translate('fake.meeting') },
+            ];
+            return `
+                <div class="fade-enter max-w-[700px] mx-auto w-full px-5">
+                    <header class="flex items-center mb-8 mt-4">
+                        <button onclick="navigate('home')" class="w-10 h-10 n-btn-sm bg-white flex items-center justify-center -ml-2 rounded-[12px]">
+                            <i data-lucide="chevron-left" class="w-6 h-6 text-toss-grey-900"></i>
+                        </button>
+                        <div class="ml-3">
+                            <h1 class="text-[22px] font-bold text-toss-grey-900">${tool.name}</h1>
+                            <p class="text-[14px] font-bold text-toss-grey-600 mt-1">${translate('fake.subtitle')}</p>
+                        </div>
+                    </header>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        ${cards.map(card => `
+                            <button onclick="openFakeScreen('${card.type}')" class="n-card n-card-hover p-5 text-left min-h-[128px] flex flex-col justify-between">
+                                <span class="w-11 h-11 rounded-full bg-toss-yellow-400 n-border-sm flex items-center justify-center">
+                                    <i data-lucide="${card.icon}" class="w-5 h-5 text-toss-grey-900"></i>
+                                </span>
+                                <span class="mt-4 flex items-center justify-between gap-3">
+                                    <strong class="text-[17px] font-bold text-toss-grey-900">${card.label}</strong>
+                                    <span class="text-[13px] font-bold text-toss-blue-600">${translate('fake.open')}</span>
+                                </span>
+                            </button>
+                        `).join('')}
+                    </div>
                 </div>
             `;
         }
@@ -1065,7 +1651,7 @@
             const skeleton = document.getElementById('loadingSkeleton'); const outputContent = document.getElementById('outputContent');
             const copyBtn = document.getElementById('copyBtn');
             const inputText = inputEl.value.trim();
-            if (!inputText) { showToast('상황을 입력해주세요.', 'default'); inputEl.focus(); return; }
+            if (!inputText) { showToast(translate('ai.missingInput'), 'default'); inputEl.focus(); return; }
 
             const toneEl = document.getElementById('aiTone'); const lengthEl = document.getElementById('aiLength');
             const toneStr = toneEl ? ` 어조는 [${toneEl.value}]로,` : ''; const lengthStr = lengthEl ? ` 길이는 [${lengthEl.value}] 작성해줘.` : '';
@@ -1075,11 +1661,11 @@
 
             try {
                 await new Promise(resolve => setTimeout(resolve, 1500));
-                const result = `[Mockup 결과]\n\n상황: ${inputText}\n옵션: ${toneEl?toneEl.value:''} / ${lengthEl?lengthEl.value:''}\n\nGitHub Pages 공개 배포본에서는 API 키를 클라이언트에 포함하지 않습니다.`;
+                const result = `${translate('ai.mockTitle')}\n\n${translate('ai.mockSituation')}: ${inputText}\n${translate('ai.mockOption')}: ${toneEl?toneEl.value:''} / ${lengthEl?lengthEl.value:''}\n\n${translate('ai.mockNotice')}`;
                 outputContent.innerText = result;
                 skeleton.classList.add('hidden'); outputContent.classList.remove('hidden'); copyBtn.classList.remove('hidden');
-                saveHistory(state.currentTool.name, result);
-            } catch (error) { skeleton.classList.add('hidden'); showToast('오류가 발생했습니다.', 'default'); }
+                saveHistory(localizeTool(state.currentTool).name, result);
+            } catch (error) { skeleton.classList.add('hidden'); showToast(translate('messages.genericError'), 'default'); }
         }
 
         function processImage() {
@@ -1274,12 +1860,12 @@
 
         function copyText(text) {
             const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; document.body.appendChild(textarea); textarea.select();
-            try { document.execCommand('copy'); showToast('복사되었습니다.', 'success'); } catch (err) { showToast('실패했습니다.', 'default'); }
+            try { document.execCommand('copy'); showToast(translate('messages.copied'), 'success'); } catch (err) { showToast(translate('messages.failed'), 'default'); }
             document.body.removeChild(textarea);
         }
 
         function saveHistory(toolName, result) {
-            const date = new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const date = new Date().toLocaleDateString(languageUi[state.language]?.locale || 'ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             state.history.unshift({ toolName, result, date }); if (state.history.length > 30) state.history.pop();
             localStorage.setItem('work_survival_history', JSON.stringify(state.history));
         }
@@ -1298,14 +1884,14 @@
         function renderSaved() {
             return `
                 <div class="fade-enter max-w-[800px] mx-auto w-full px-5 pt-8">
-                    <header class="mb-8"><h1 class="text-[28px] font-bold text-toss-grey-900">저장함</h1><p class="text-[15px] font-bold text-toss-grey-600 mt-2">생성했던 결과물들</p></header>
+                    <header class="mb-8"><h1 class="text-[28px] font-bold text-toss-grey-900">${translate('saved.title')}</h1><p class="text-[15px] font-bold text-toss-grey-600 mt-2">${translate('saved.subtitle')}</p></header>
                     <div class="flex flex-col gap-4">
-                        ${state.history.length === 0 ? `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">저장된 내역이 없습니다.</p></div>` : 
+                        ${state.history.length === 0 ? `<div class="text-center py-20 n-card"><p class="text-toss-grey-900 font-bold">${translate('saved.empty')}</p></div>` :
                         state.history.map((item) => `
                             <article class="n-card p-6">
                                 <div class="flex justify-between items-center mb-3"><span class="n-border-sm bg-toss-blue-50 text-toss-blue-600 text-[12px] font-bold px-2 py-1 rounded-[8px]">${item.toolName}</span><span class="text-[13px] text-toss-grey-500 font-bold">${item.date}</span></div>
                                 <p class="text-[15px] font-bold text-toss-grey-900 leading-relaxed mb-4 whitespace-pre-wrap">${escapeHtml(item.result)}</p>
-                                <button onclick="copyText('${escapeHtml(item.result)}')" class="w-full n-btn bg-white text-toss-grey-900 text-[14px] py-3">복사하기</button>
+                                <button onclick="copyText('${escapeHtml(item.result)}')" class="w-full n-btn bg-white text-toss-grey-900 text-[14px] py-3">${translate('saved.copy')}</button>
                             </article>
                         `).join('')}
                     </div>
