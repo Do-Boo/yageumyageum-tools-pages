@@ -148,7 +148,7 @@
             margin: 0 auto;
             padding: 0 1rem;
             display: grid;
-            grid-template-columns: 72px minmax(0, 1fr) 92px;
+            grid-template-columns: 72px minmax(0, 1fr) 144px;
             align-items: center;
         }
         .top-nav-actions {
@@ -163,14 +163,34 @@
         }
         .top-language-label {
             justify-self: end;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 0;
+            color: #191f28;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+        }
+        .top-language-select {
+            width: 76px;
+            flex: 0 0 auto;
         }
         @media (min-width: 640px) {
             .top-nav-inner {
                 padding: 0 1.5rem;
-                grid-template-columns: 96px minmax(0, 1fr) 110px;
+                grid-template-columns: 96px minmax(0, 1fr) 176px;
             }
             .top-nav-actions {
                 gap: 2.5rem;
+            }
+            .top-language-label {
+                font-size: 16px;
+                gap: 8px;
+            }
+            .top-language-select {
+                width: 92px;
             }
         }
     </style>
@@ -186,8 +206,8 @@
                 <button onclick="navigate('saved')" class="nav-btn text-[17px] font-bold text-toss-grey-700 hover:text-toss-grey-900 transition-colors" data-view="saved">저장함</button>
             </div>
             <label class="top-language-label">
-                <span class="sr-only">Language</span>
-                <select id="languageSelect" class="n-btn-sm bg-white text-toss-grey-900 text-[12px] px-2 py-1.5 max-w-[92px]">
+                <span>Language</span>
+                <select id="languageSelect" class="top-language-select n-btn-sm bg-white text-toss-grey-900 text-[12px] px-2 py-1.5">
                     <option value="auto">Auto</option>
                     <option value="ko">한국어</option>
                     <option value="en">English</option>
